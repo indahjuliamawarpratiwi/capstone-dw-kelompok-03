@@ -6,7 +6,7 @@ indikator tetap dibaca terpisah karena berasal dari berkas yang berbeda.
 
 Jumlah baris snapshot 2026-10-20 sebelum penyaringan:
 
-- wdi/2026-10-20/data/kelompok-07-hal-01.json       2112 baris, 32 indikator
+- wdi/2026-10-20/data/kelompok-03-hal-01.json       2112 baris, 32 indikator
 - wdi/2026-10-20/metadata/sumber.json                  71 baris sumber
 - wdi/2026-10-20/metadata/sumber2_indikator.json     1498 baris indikator
 - wdi/2026-10-20/metadata/sumber46_indikator.json      408 baris indikator
