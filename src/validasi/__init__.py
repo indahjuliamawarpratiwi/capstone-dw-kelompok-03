@@ -2,11 +2,12 @@
 
 import pandas as pd
 from pathlib import Path
-from .silver import validasi_silver
 
 
 def jalankan(silver=None, gold=None) -> dict:
     """Jalankan validasi Silver. Dipanggil otomatis oleh pipeline.py."""
+    from .silver import validasi_silver
+
     if not isinstance(silver, pd.DataFrame):
         path = Path("data/silver/silver.parquet")
         if not path.exists():
