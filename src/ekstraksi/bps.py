@@ -13,7 +13,8 @@ Jumlah baris snapshot 2026-10-20 (baris header CSV tidak dihitung):
 - bps/2026-10-20/json/sdg3_3_7_2_v1353.json  69
 
 Total 276 baris. Berkas `manifest_asal.json` adalah metadata, bukan tabel data, jadi tidak
-dimasukkan ke tabel panjang.
+dimasukkan ke tabel data. Pembaca metadata membacanya terpisah: 36 entri tabel, disaring menjadi
+2 entri yang sesuai dengan var 1394 dan 1353.
 
 Catatan kasus 4.2: judul tabel var1353 di JSON adalah "Angka Kelahiran Pada Perempuan Usia
 15-19 Tahun Menurut Provinsi". Kelompok umur yang benar-benar dicakup adalah 15-19 tahun,
@@ -26,24 +27,13 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.common.manifest import RAW, sha256_raw
+from src.common.manifest import RAW
+from ._umum import baca_teks, ke_angka, tempel_lineage
 
 KOLOM_ASAL = [
     "var_id", "wilayah_id", "wilayah", "turvar_id", "turvar",
     "tahun_id", "tahun", "periode_id", "periode", "nilai", "satuan",
 ]
-ENCODING = ("utf-8-sig", "cp1252", "latin-1")
-
-
-def _baca_teks(path):
-    """Baca berkas dengan beberapa kemungkinan pengodean karakter."""
-    mentah = Path(path).read_bytes()
-    for pengodean in ENCODING:
-        try:
-            return mentah.decode(pengodean)
-        except UnicodeDecodeError:
-            continue
-    raise UnicodeDecodeError("utf-8", mentah, 0, len(mentah), "pengodean tidak dikenal")
 
 
 def _deteksi_pemisah(teks):
@@ -53,28 +43,6 @@ def _deteksi_pemisah(teks):
         return csv.Sniffer().sniff(contoh, delimiters=",;\t|").delimiter
     except csv.Error:
         return ","
-
-
-def _ke_angka(nilai):
-    """Ubah nilai menjadi angka tanpa mengisi nilai kosong.
-
-    Mendukung desimal titik (44.4), desimal koma (44,4), dan pemisah ribuan Indonesia
-    (1.234,5 -> 1234.5). Nilai kosong tetap menjadi NA agar tidak dianggap nol.
-    """
-    if nilai is None:
-        return pd.NA
-    if isinstance(nilai, bool):
-        return float(nilai)
-    if isinstance(nilai, (int, float)):
-        return float(nilai)
-    teks = str(nilai).strip()
-    if not teks:
-        return pd.NA
-    if "," in teks:
-        teks = teks.replace(".", "").replace(",", ".")
-    elif teks.count(".") > 1:
-        teks = teks.replace(".", "")
-    return float(teks)
 
 
 def _ke_int(nilai):
@@ -136,18 +104,10 @@ def _peta_dimensi(obj, path):
     return peta
 
 
-def _tempel_lineage(df, path, raw):
-    """Tambahkan asal berkas dan sha256 dari MANIFEST.csv."""
-    rel = Path(path).resolve().relative_to(Path(raw).resolve()).as_posix()
-    df["_berkas_raw"] = rel
-    df["_sha256_raw"] = sha256_raw(rel, raw)
-    return df
-
-
 def baca_csv(path, raw=RAW):
     """Baca satu CSV BPS menjadi tabel panjang dengan kolom asal + lineage."""
     path = Path(path)
-    teks = _baca_teks(path)
+    teks = baca_teks(path)
     pembaca = csv.DictReader(io.StringIO(teks), delimiter=_deteksi_pemisah(teks))
 
     baris = []
@@ -162,18 +122,18 @@ def baca_csv(path, raw=RAW):
             "tahun": _ke_int(asal.get("tahun")),
             "periode_id": _ke_int(asal.get("periode_id")),
             "periode": asal.get("periode"),
-            "nilai": _ke_angka(asal.get("nilai")),
+            "nilai": ke_angka(asal.get("nilai")),
             "satuan": asal.get("satuan", ""),
         })
 
     df = pd.DataFrame(baris, columns=KOLOM_ASAL)
-    return _tempel_lineage(df, path, raw)
+    return tempel_lineage(df, path, raw)
 
 
 def baca_json(path, raw=RAW):
     """Baca satu JSON WebAPI BPS dan ratakan vervar/turvar/tahun/datacontent."""
     path = Path(path)
-    isi = json.loads(_baca_teks(path))
+    isi = json.loads(baca_teks(path))
     if isinstance(isi, dict):
         isi = [isi]
 
@@ -200,12 +160,12 @@ def baca_json(path, raw=RAW):
                 "tahun": _tahun(tahun["label"]),
                 "periode_id": _ke_int(turtahun["val"]),
                 "periode": turtahun["label"],
-                "nilai": _ke_angka(nilai),
+                "nilai": ke_angka(nilai),
                 "satuan": var.get("unit", ""),
             })
 
     df = pd.DataFrame(baris, columns=KOLOM_ASAL)
-    return _tempel_lineage(df, path, raw)
+    return tempel_lineage(df, path, raw)
 
 
 def baca_berkas(path, raw=RAW):
@@ -233,7 +193,53 @@ def baca_semua(raw=RAW):
     return pd.concat([baca_berkas(p, raw) for p in berkas], ignore_index=True)
 
 
+def _berkas_metadata(raw):
+    akar = Path(raw) / "bps"
+    berkas = sorted(akar.glob("**/manifest_asal.json"))
+    if not berkas:
+        raise FileNotFoundError(f"manifest metadata BPS tidak ditemukan di {akar}")
+    return berkas
+
+
+def baca_metadata(path, raw=RAW, var_relevan=None):
+    """Baca metadata manifest BPS dan ratakan entri `tabel` menjadi baris."""
+    path = Path(path)
+    isi = json.loads(baca_teks(path))
+    if not isinstance(isi, dict) or not isinstance(isi.get("tabel"), dict):
+        raise ValueError(f"{path}: struktur manifest BPS tidak dikenal")
+
+    baris = []
+    for nama, tabel in isi["tabel"].items():
+        if var_relevan is not None and str(tabel.get("var")) not in var_relevan:
+            continue
+        rekaman = {"nama_tabel": nama}
+        for kunci, nilai in isi.items():
+            if kunci != "tabel":
+                rekaman[kunci] = nilai
+        rekaman.update(tabel)
+        baris.append(rekaman)
+
+    df = pd.DataFrame(baris)
+    return tempel_lineage(df, path, raw)
+
+
+def baca_metadata_semua(raw=RAW, var_relevan=None):
+    """Baca semua manifest metadata BPS; saring ke var yang ada di data bila diberikan."""
+    if var_relevan is None:
+        data = baca_semua(raw)
+        var_relevan = {str(x) for x in data["var_id"].dropna()}
+    return pd.concat(
+        [baca_metadata(p, raw, var_relevan) for p in _berkas_metadata(raw)],
+        ignore_index=True,
+    )
+
+
 if __name__ == "__main__":
     hasil = baca_semua()
     print(hasil.groupby("_berkas_raw", sort=True).size().to_string())
     print(f"total {len(hasil)} baris")
+    metadata = baca_metadata_semua(
+        var_relevan={str(x) for x in hasil["var_id"].dropna()}
+    )
+    print(metadata.groupby("_berkas_raw", sort=True).size().to_string())
+    print(f"total metadata {len(metadata)} baris")
