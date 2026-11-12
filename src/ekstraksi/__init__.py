@@ -8,4 +8,6 @@ dan catat asal tiap baris (`_berkas_raw` relatif data/raw/, `_sha256_raw` dari s
 
 def jalankan():
     """Kembalikan {nama_sumber: DataFrame mentah}."""
-    raise NotImplementedError("Tahap 1: tulis pembaca untuk tiap format di data/raw/")
+    from . import bps
+
+    return {"bps": bps.baca_semua()}
