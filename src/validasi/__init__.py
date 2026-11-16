@@ -1,10 +1,25 @@
-"""Tahap 8 — Validasi dan dokumentasi (pertemuan XIV–XV). Milik tim.
+"""Tahap 8 — Validasi skema Silver menggunakan Pandera."""
 
-Tulis skema validasi Silver dan Gold (pandera atau Great Expectations): rentang nilai per satuan,
-kelengkapan wilayah, keunikan kunci, konsistensi provinsi vs nasional bila relevan. Laporan
-validasi ditulis ke reports/validasi.md. Data dictionary di docs/data-dictionary.md.
-"""
+import pandas as pd
+from pathlib import Path
+from .silver import validasi_silver
 
 
-def jalankan(silver, gold):
-    raise NotImplementedError("Tahap 8: skema pandera/GE untuk Silver dan Gold")
+def jalankan(silver=None, gold=None) -> dict:
+    """Jalankan validasi Silver. Dipanggil otomatis oleh pipeline.py."""
+    if not isinstance(silver, pd.DataFrame):
+        path = Path("data/silver/silver.parquet")
+        if not path.exists():
+            print("data/silver/silver.parquet tidak ditemukan.")
+            return {}
+        silver = pd.read_parquet(path)
+
+    print("\n── Validasi Silver ──")
+    hasil = validasi_silver(silver)
+    for pesan in hasil["pesan"]:
+        print(pesan)
+    if hasil["gagal"]:
+        print("  Contoh pelanggaran (maks 5):")
+        for item in hasil["gagal"][:5]:
+            print(f"    kolom={item['kolom']}, aturan={item['periksa']}, nilai={item['contoh']}")
+    return hasil
