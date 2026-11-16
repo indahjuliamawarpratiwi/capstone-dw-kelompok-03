@@ -13,6 +13,11 @@ Tabel Silver adalah hasil pengolahan data mentah yang sudah dibersihkan, distand
 
 **Hasil pipeline:** 373 baris; 276 BPS (CSV dan JSON dipertahankan), 32 WHO, dan 65 WDI. Tidak ada nilai kosong atau duplikat pada kunci Silver.
 
+**Artefak profil dan anomali:**
+- `data/silver/profil.csv` — statistik per seri: jumlah observasi, nilai minimum/kuartil/maksimum, IQR, missing, duplikat logis, dan patahan.
+- `data/silver/anomali.csv` — nilai kosong, outlier IQR, patahan per wilayah, dan ringkasan duplikat lintas berkas.
+- `data/silver/boxplot_seri.png` — boxplot sebaran nilai per seri sebelum pembersihan.
+
 **Perintah cek skema:**
 ```bash
 python -m src.common.skema data/silver/silver.parquet
@@ -109,3 +114,4 @@ Kombinasi ini tidak boleh duplikat di dalam tabel Silver.
 |---|---|---|
 | 2026-11-11 | Pembuatan awal data dictionary | Anash Tasya Ausyaqila (124450050) |
 | 2026-11-12 | Menambahkan hasil pipeline Silver dan keputusan WHO/WDI | Queenta Thifaal Nabila (124450059) |
+| 2026-11-12 | Menambahkan artefak profil, anomali, dan boxplot tahap 2 | Risa Romadona (124450127) |

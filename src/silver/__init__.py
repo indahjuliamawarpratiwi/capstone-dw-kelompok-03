@@ -1,6 +1,7 @@
 """Tahap 2–4 — Profil, pembersihan, dan penyeragaman ke Silver (pertemuan II–VII).
 
-Keluaran: data/silver/silver.parquet dengan skema minimal di src/common/skema.py.
+Keluaran: data/silver/silver.parquet dengan skema minimal di src/common/skema.py,
+data/silver/profil.csv, data/silver/anomali.csv, dan data/silver/boxplot_seri.png.
 Satu baris = satu seri x wilayah x periode x rincian x berkas sumber. Nilai dari sumber berbeda
 TIDAK digabung di sini. Setiap keputusan pembersihan dicatat di log-keputusan.csv.
 """
@@ -10,6 +11,7 @@ import pandas as pd
 
 from src.common import skema
 from src.common.manifest import baca
+from . import profil as profil_seri
 
 ROOT = Path(__file__).resolve().parents[2]
 TUJUAN = ROOT / "data" / "silver" / "silver.parquet"
@@ -77,7 +79,7 @@ def _who(df):
     return hasil[skema.KOLOM]
 
 
-def _wdi(df):
+def _wdi(df, buang_kosong=True):
     hasil = df.copy()
     hasil["sumber"] = "WDI"
     hasil["seri_kode"] = hasil["indicator.id"].astype(str)
@@ -88,20 +90,40 @@ def _wdi(df):
     hasil["rincian"] = "Total"
     hasil["nilai"] = pd.to_numeric(hasil["value"], errors="coerce")
     hasil["satuan"] = "per 1.000 perempuan usia 15-19"
-    hasil = hasil.dropna(subset=["nilai"])
+    if buang_kosong:
+        hasil = hasil.dropna(subset=["nilai"])
     return hasil[skema.KOLOM]
 
 
-def jalankan(mentah):
-    """Terima keluaran tahap 1, tulis dan kembalikan DataFrame Silver."""
+def _panjang(mentah):
     hasil = pd.concat(
-        [_bps(mentah["bps"]), _who(mentah["who_gho"]), _wdi(mentah["wdi"])],
+        [
+            _bps(mentah["bps"]),
+            _who(mentah["who_gho"]),
+            _wdi(mentah["wdi"], buang_kosong=False),
+        ],
         ignore_index=True,
     )
-    hasil = hasil.sort_values(
+    return hasil.sort_values(
         ["sumber", "_berkas_raw", "seri_kode", "wilayah_kode", "periode", "rincian"],
         kind="stable",
     ).reset_index(drop=True)
+
+
+def _bersih(df):
+    hasil = df.dropna(subset=["nilai"])
+    hasil = hasil.drop_duplicates(skema.KUNCI)
+    return hasil.sort_values(
+        ["sumber", "_berkas_raw", "seri_kode", "wilayah_kode", "periode", "rincian"],
+        kind="stable",
+    ).reset_index(drop=True)
+
+
+def jalankan(mentah):
+    """Profil, bersihkan, validasi, dan tulis tabel Silver."""
+    panjang = _panjang(mentah)
+    profil_seri.jalankan(panjang)
+    hasil = _bersih(panjang)
 
     salah = skema.periksa_silver(hasil, manifest=baca())
     if salah:
