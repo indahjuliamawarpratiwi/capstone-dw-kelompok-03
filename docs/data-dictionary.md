@@ -100,3 +100,17 @@ Kombinasi ini tidak boleh duplikat di dalam tabel Silver.
 | Tanggal | Perubahan | Oleh |
 |---|---|---|
 | 2026-11-11 | Pembuatan awal data dictionary | Anash Tasya Ausyaqila (124450050) |
+| 2026-11-16 | Tambahan artefak integrasi/penyimpanan Sprint 1 (NIM 124450055) | Indah Julia Mawar Pratiwi (124450055) |
+
+---
+
+## Artefak tambahan — NIM 124450055 (Sprint 1)
+
+Bagian ini **melengkapi** data dictionary di atas tanpa mengubah isi/penulis sebelumnya.
+
+- `data/silver/silver.parquet`: **235 baris**, **5 seri** (`var1394`, `var1353`, `MDG_0000000003`, `SDGFPALL`, `SP.ADO.TFRT`), **35 wilayah**, **5 berkas sumber**, duplikat kunci 0, nilai kosong 0.
+- `who_gho/SDGFPALL`: **6 baris** (`2002,2007,2012,2015,2016,2017`; rincian `Y15T49`; `RATE_PER_100_N`; satuan `Persen`) — nilai diambil per baris (`RATE_PER_1000_N` bila terisi, selain itu `RATE_PER_100_N`).
+- `data/gold/silver.sqlite` (tabel `silver`): **235 baris**, **11 kolom**, PK `(sumber, seri_kode, wilayah_kode, periode, rincian, _berkas_raw)`, duplikat PK 0, isi konsisten dengan parquet.
+- `data/gold/nasional_periode_seri.parquet`: **101 baris** nasional (`wilayah_kode==9999`), 5 seri.
+- Catatan satuan: `var1353` ditetapkan `per 1,000 perempuan usia 15-19 tahun` dari metadata SDKI (CSV mentah kosong) dan **masih perlu konfirmasi final tim** (berbeda dari catatan sebelumnya yang membiarkan kosong).
+- Detail keputusan: `log-keputusan.csv` K-003..K-008; rincian lengkap di `sprint-1/laporan-sprint-1-124450055.md` dan `reports/sprint1/`.
