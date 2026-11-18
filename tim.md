@@ -1,55 +1,63 @@
-# Laporan Tim — Kelompok 3, Kasus 03 Kesehatan Reproduksi Remaja
+# Laporan tim — Kelompok 3, Kasus 03 Kesehatan reproduksi remaja
+
+Status: draf akhir Sprint 1. Angka dapat ditarik ulang dari `data/silver/silver.parquet`, `reports/`, dan
+`log-keputusan.csv` (id K-xxx).
 
 ## Ringkasan
 
-Kelompok 3 mengerjakan Capstone Data Wrangling dengan Kasus 03 — Kesehatan Reproduksi Remaja yang berfokus pada indikator kesehatan reproduksi remaja di Indonesia. Seri utama yang digunakan berasal dari BPS var1394 dan var1353 periode 2012–2017, sedangkan pembanding nasional berasal dari WHO GHO dan World Development Indicators (WDI). Fokus pengerjaan adalah membangun pipeline yang dapat direproduksi dari data mentah hingga Silver dan Gold, serta melakukan rekonsiliasi seri provinsi dengan pembanding nasional. Temuan awal menunjukkan bahwa perbedaan satuan, kelompok umur, periode, dan cakupan wilayah perlu diperhatikan agar integrasi data tidak menghasilkan interpretasi yang keliru.
+Kasus ini menyatukan dua seri provinsi BPS dari SDKI (KB metode modern dan angka kelahiran remaja) dengan
+satu seri WDI dan dua seri WHO. Silver pertama berisi 235 baris dari 5 seri. Data
+angkanya kecil dan bersih; kesulitannya ada pada kata "sama": kelompok umur angka kelahiran remaja, satuan
+yang tidak ditulis BPS, dan penyebut KB yang berbeda antara BPS dan WHO.
 
-## Data dan Lineage
+## Data dan lineage
 
-Data yang digunakan berasal dari tiga sumber utama, yaitu BPS, WHO GHO, dan WDI. Data mentah diperoleh melalui program `unduh_data.py` dengan argumen `--kasus 3`. Paket data yang diunduh mencakup snapshot 17–20 Oktober 2026 dan disimpan pada folder `data/raw/`.
+13 berkas mentah dari snapshot 20 Oktober 2026: BPS (2 CSV, 2 JSON, 1 catatan unduhan), WDI
+(1 berkas data, 3 metadata), WHO GHO (2 CSV, 2 metadata). Semua berkas tertangani oleh `ekstraksi.jalankan()`
+(374 baris mentah di berkas data). Setiap baris Silver membawa `_berkas_raw` dan `_sha256_raw`.
 
-Berkas mentah dipertahankan sebagai sumber awal pengolahan. Atribut `_berkas_raw` digunakan untuk mencatat asal berkas data, sedangkan `_sha256_raw` digunakan untuk menyimpan checksum SHA256 agar integritas dan keterlacakan data dapat diperiksa.
+## Masalah data dan penanganannya
 
-Jumlah berkas mentah, format setiap sumber, serta hasil tarik ulang API akan didokumentasikan berdasarkan pemeriksaan aktual pada repository tim. Perubahan sejak snapshot awal akan dibandingkan apabila proses tarik ulang API dilakukan.
-
-## Masalah Data dan Penanganannya
-
-| Masalah | Jumlah Baris Terdampak | Keputusan | Alternatif Ditolak | ID Log |
-|---|---:|---|---|---|
-| Perbedaan periode data | 0 | Periode Februari dan Agustus disimpan sebagai `jenis_periode=bulan` | Mengagregasikan langsung menjadi tahunan | K-001 |
-| Perbedaan referensi wilayah | 16 | Menggunakan susunan 38 provinsi Indonesia tahun 2025 sebagai referensi pemetaan | Menggunakan nama wilayah tanpa referensi baku | K-002 |
-| Satuan indikator tidak lengkap | 69 | Menentukan satuan berdasarkan metadata sumber | Mengasumsikan satuan dari nilai data | Perlu dicatat |
-| Missing value | 16 | Memeriksa penyebab missing sebelum menentukan penanganan | Menghapus seluruh baris yang memiliki nilai kosong | Perlu dicatat |
-| Perbedaan kelompok umur | 26 | Memisahkan kelompok umur sesuai definisi indikator | Menggabungkan seluruh kelompok umur | Perlu dicatat |
-| Patahan seri | 0 | Memeriksa definisi dan cakupan indikator antarperiode | Menganggap seluruh periode memiliki definisi identik | Perlu dicatat |
-
-
-## Integrasi dan Rekonsiliasi
-
-Integrasi dilakukan dengan menggunakan seri utama BPS var1394 dan var1353 sebagai indikator tingkat provinsi. Pembanding nasional menggunakan WHO GHO MDG_0000000003, WHO GHO SDGFPALL, dan WDI SP.ADO.TFRT.
-
-Rekonsiliasi dilakukan dengan memperhatikan perbedaan definisi indikator, metode penghitungan, vintage data, granularitas, dan periode pengamatan. Perbedaan nilai antara seri utama dan pembanding nasional tidak langsung dianggap sebagai kesalahan karena dapat disebabkan oleh perbedaan definisi dan cakupan pengukuran.
-
-Analisis revisi dari arsip WDI dilakukan dengan membandingkan nilai indikator pada beberapa vintage rilis. Besaran selisih, perubahan nilai, dan hasil analisis revisi akan dilengkapi berdasarkan keluaran tabel Gold dan arsip WDI yang telah diproses.
-
-## Validasi dan Reproduksibilitas
-
-Validasi dilakukan terhadap data Silver menggunakan modul skema yang tersedia pada repository. Pemeriksaan mencakup kesesuaian tipe data, kelengkapan atribut, konsistensi identitas wilayah, serta validitas periode dan indikator.
-
-Pipeline dirancang agar dapat menghasilkan ulang data Silver, Gold, dan tabel rekonsiliasi dari data mentah. Perintah utama yang digunakan adalah:
-
-```bash
-python unduh_data.py --kasus 3
-```
-
-Hasil validasi, jumlah aturan yang lolos dan gagal, waktu eksekusi pipeline dari kondisi awal, serta perbandingan pandas dengan DuckDB/Dask akan dilengkapi berdasarkan hasil pengujian aktual. Keterbatasan yang masih diperhatikan adalah rentang periode seri provinsi yang berhenti pada 2017 serta kemungkinan perbedaan definisi indikator antar sumber.
-
-## Pembagian Kerja
-
-| Anggota | NIM | Komponen | Tugas Sampingan | Bagian Laporan yang Ditulis |
+| Masalah | Bukti | Keputusan | Baris terdampak | Log |
 |---|---|---|---|---|
-| Anash Tasya Ausyaqila | 124450050 | Reproduksi dan Demo — Validasi dan Dokumentasi | Pemeriksaan hasil pipeline dan dokumentasi | Validasi dan Reproduksibilitas |
-| Indah Julia Mawar Pratiwi | 124450055 | Koordinator — Integrasi, Penyimpanan, dan Skala | Koordinasi repository dan integrasi tim | Integrasi dan Rekonsiliasi |
-| Queenta Thifaal Nabila | 124450059 | Integrator — Ekstraksi dan Lineage | Ekstraksi data, pemeriksaan manifest, dokumentasi lineage | Data dan Lineage |
-| Hazel Mahesa Handhaka | 124450114 | Anggota | Mendukung pengerjaan pipeline sesuai pembagian tim | Sesuai tugas yang disepakati |
-| Risa Romadona | 124450127 | Analis Utama — Profil dan Pembersihan | Analisis kualitas data dan pembersihan | Masalah Data dan Penanganannya | Pembagian kerja ini disesuaikan dengan peran anggota yang tercantum pada papan Capstone tim. NIM anggota lain dan bagian laporan final perlu dilengkapi berdasarkan kesepakatan kelompok.
+| Kelompok umur `var1353` | `var.label`: perempuan 15–19 | cakupan seri; pembanding WHO `umur=15-19` | 0 | K-003 |
+| Satuan `var1353` kosong | definisi WHO, nama WDI, besaran angka | `per_1000_perempuan_seumur` | 69 | K-007 |
+| Dua kelompok umur WHO dalam satu berkas | `DIM_AGE` Y10T14, Y15T19 | rincian `umur=10-14`, `umur=15-19` | 3 nilai rincian | K-006 |
+| Penyebut KB berbeda | Denominator WHO; BPS Indonesia jauh di bawah WHO | P3 kategori definisi | 2 tahun | K-009 |
+| Panel dua titik survei | `tahun` JSON: 2012, 2017 | tidak diinterpolasi | 0 | K-005 |
+| Provinsi belum dibentuk | Kalimantan Utara 2012, provinsi Papua baru | `belum_ada` | 18 sel | K-001 |
+| Wilayah induk mengecil | Kalimantan Timur 2012→2017 | `patahan_wilayah` | 2 | K-013 |
+| Calon anomali | IQR antarprovinsi dan perubahan | 3 outlier ditandai, nilai tidak diubah | 3 | K-004 |
+| Spasi di akhir judul | `var.label` var1353 | dibuang di nama baku | 0 | K-012 |
+| BPS dua format | nilai CSV = JSON | JSON sebagai sumber | 138 | K-002 |
+
+Tidak ada sel yang benar-benar missing (0) dan tidak ada galat input (0). Panel
+provinsi hanya berlaku untuk 2012 dan 2017; panel tidak menggambarkan keadaan sesudah 2017.
+
+## Integrasi dan rekonsiliasi
+
+Disiapkan di Sprint 1, dihitung di Sprint 2 (`reports/pasangan-rekonsiliasi.md`):
+
+- P1 angka kelahiran remaja BPS vs WDI: 2 tahun beririsan; survei vs model penduduk.
+- P2 BPS vs WHO `umur=15-19`: 0 tahun beririsan; dibandingkan dengan tahun terdekat.
+- P3 KB BPS vs WHO kebutuhan KB terpenuhi: 2 tahun; selisih definisi (penyebut).
+- P4 WHO vs WDI: 14 tahun; sumber berbeda.
+
+## Validasi dan reproduksibilitas
+
+12 aturan berjalan setiap `python pipeline.py` (12 lolos, 0
+peringatan; `reports/validasi.md`). Aturan khas kasus: tidak ada tahun BPS di luar 2012 dan 2017, setiap baris
+WHO angka kelahiran remaja punya kelompok umur, satu satuan untuk semua angka kelahiran remaja; dua peringatan
+menjaga pola 10–14 < 15–19 dan KB BPS < WHO. Setiap aturan diuji dengan baris yang sengaja dirusak (`tests/`).
+Silver dimuat ke DuckDB dengan kunci primer dan CHECK (235 baris). `python pipeline.py` berjalan
+±1.8 detik.
+
+## Pembagian kerja
+
+| Anggota | NIM | Komponen | Bagian laporan |
+|---|---|---|---|
+| Anash Tasya Ausyaqila | 124450050 | Reproduksi dan Demo — Validasi dan Dokumentasi | Validasi dan Reproduksibilitas |
+| Indah Julia Mawar Pratiwi | 124450055 | Koordinator — Integrasi, Penyimpanan, dan Skala | Integrasi dan Rekonsiliasi |
+| Queenta Thifaal Nabila | 124450059 | Integrator — Ekstraksi dan Lineage | Data dan Lineage |
+| Hazel Mahesa Handhaka | 124450114 | Anggota — pendukung pipeline | Sesuai kesepakatan tim |
+| Risa Romadona | 124450127 | Analis Utama — Profil dan Pembersihan | Masalah Data dan Penanganannya |

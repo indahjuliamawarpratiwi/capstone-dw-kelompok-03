@@ -1,117 +1,66 @@
-# Data Dictionary — Silver Layer
-**Kelompok 3 | Kasus 03: Kesehatan Reproduksi Remaja Indonesia**
-**Penulis:** Anash Tasya Ausyaqila (124450050)
-**Terakhir diperbarui:** 2026-11-12
+# Data dictionary — Kasus 03 Kesehatan reproduksi remaja
 
----
+Ditulis ulang otomatis oleh `python pipeline.py` (`src/dokumen.py`). Tipe, rentang, dan jumlah kosong dihitung dari `data/silver/silver.parquet`.
 
-## Tentang Tabel Silver
+## data/silver/silver.parquet (235 baris)
 
-Tabel Silver adalah hasil pengolahan data mentah yang sudah dibersihkan, distandarisasi, dan dilengkapi informasi asal-usul data (lineage). Data bersumber dari **BPS**, **WHO GHO**, dan **World Bank (WDI)**: seri provinsi BPS mencakup 2012–2017, sedangkan pembanding nasional WHO/WDI mencakup 1960–2025. Baris WDI 2025 yang kosong tidak masuk Silver.
+Satu baris = satu seri x wilayah x periode x rincian x berkas sumber. Kunci unik: sumber, seri_kode, wilayah_kode, periode, rincian, _berkas_raw.
 
-**Lokasi file:** `data/silver/silver.parquet`
+| kolom | tipe | kosong | rentang_atau_nilai | asal | arti |
+|---|---|---|---|---|---|
+| sumber | str | 0 | bps, wdi, who_gho | nama folder sumber di data/raw/ | lembaga penerbit: bps, wdi, who_gho, ilostat, bnpb |
+| seri_kode | str | 0 | MDG_0000000003, SDGFPALL, SP.ADO.TFRT, var1353, var1394 | kode seri di sumbernya (BPS: 'var' + var.val) | identitas seri; arti lengkap di docs/seri.csv |
+| wilayah_kode | int64 | 0 | 1100 – 9999 | kamus src/wilayah.py; log K-001 | kode BPS dua digit x 100; 9999 = Indonesia |
+| nama_wilayah | str | 0 | Aceh, Bali, Banten, Bengkulu, DI Yogyakarta, DKI Jakarta, … (35 nilai) | kamus src/wilayah.py | nama baku susunan 38 provinsi 2025, bukan label sumber |
+| periode | str | 0 | 1960, 1961, 1962, 1963, 1964, 1965, … (65 nilai) | tahun/turtahun BPS, date WDI, DIM_TIME WHO | bentuk baku: 2019, 2019-S1, 2019-Q3, 2019-07 |
+| jenis_periode | str | 0 | tahun | diturunkan dari periode | tahun, semester, triwulan, atau bulan |
+| rincian | str | 0 | total, umur=10-14, umur=15-19 | turvar BPS; kolom DIM_* WHO yang bervariasi | 'total' atau 'dimensi=kode;...'; lihat kamus di bawah |
+| nilai | float64 | 0 | 0.264736 – 151.704 | datacontent BPS; value WDI; RATE_*_N WHO | angka sesuai satuan; baris tanpa angka tidak masuk Silver |
+| satuan | str | 0 | per_1000_perempuan_seumur, persen | src/konfigurasi.py, bukti di docs/seri.csv | satuan baku; satu satuan per seri |
+| sdg_kode | str | 0 | 3.7.1, 3.7.2 | src/konfigurasi.py, bukti di docs/seri.csv | kode indikator SDG (kolom tambahan) |
+| batas_bawah | float64 | 235 | — | RATE_*_NL WHO | batas bawah ketidakpastian; kosong bila sumber tidak memberi |
+| batas_atas | float64 | 235 | — | RATE_*_NU WHO | batas atas ketidakpastian; kosong bila sumber tidak memberi |
+| rujukan_tahun | Int64 | 235 | — | var.note BPS; log | lebar jendela rujukan survei (tahun sebelum survei); kosong bila tidak berlaku |
+| _berkas_raw | str | 0 | bps/2026-10-20/json/sdg3_3_7_1_v1394.json, bps/2026-10-20/json/sdg3_3_7_2_v1353.json, wdi/2026-10-20/data/kelompok-03-hal-01.json, who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv, who_gho/2026-10-20/datadot/8074BD9_SDGFPALL.csv | jalur berkas mentah relatif data/raw/ | lineage: berkas asal baris ini |
+| _sha256_raw | str | 0 | 230ce163135e9ea9e078649b2812136780e9e2db9d4c110dc3e21f2fe50faf5a, 6ae359c6df0dfd6ce210233dc28ada9060be0996f855288d6c4fbfee88b55c74, 894de8e94f8c2c76aaa44f3a3f541607429e924d9101a80a2d5eebcfe433284b, 9a8729675761d697bd5556d66fd903ed841ee454e7324d41084dc09b9905f912, efd85410d3d2939a3fabcb1a17489a3860985eec2685d49787919c3657a7e702 | src.common.manifest.sha256_raw | lineage: sidik isi berkas asal, dicocokkan dengan MANIFEST.csv |
 
-**Hasil pipeline:** 373 baris; 276 BPS (CSV dan JSON dipertahankan), 32 WHO, dan 65 WDI. Tidak ada nilai kosong atau duplikat pada kunci Silver.
+## Kamus rincian
 
-**Artefak profil dan anomali:**
-- `data/silver/profil.csv` — statistik per seri: jumlah observasi, nilai minimum/kuartil/maksimum, IQR, missing, duplikat logis, dan patahan.
-- `data/silver/anomali.csv` — nilai kosong, outlier IQR, patahan per wilayah, dan ringkasan duplikat lintas berkas.
-- `data/silver/boxplot_seri.png` — boxplot sebaran nilai per seri sebelum pembersihan.
+Aturan menulis rincian (log): dimensi yang bervariasi ditulis `nama=kode`, dipisah `;`, urut abjad; nilai total sumber dibuang; baris tanpa dimensi bervariasi ditulis `total`. Dimensi yang nilainya tetap di seluruh berkas dianggap bagian definisi seri dan dicatat di kolom `cakupan` docs/seri.csv.
 
-**Perintah cek skema:**
-```bash
-python -m src.common.skema data/silver/silver.parquet
-```
+Nama dimensi dan kode yang sah:
 
----
+- `jenis_kelamin`: `FEMALE`, `MALE`
+- `umur`: `10-14`, `15-19`
 
-## Skema Kolom Silver
+| rincian | dipakai_seri |
+|---|---|
+| total | SDGFPALL, SP.ADO.TFRT, var1353, var1394 |
+| umur=10-14 | MDG_0000000003 |
+| umur=15-19 | MDG_0000000003 |
 
-### Kolom Identitas Data
+## Satuan, kode SDG, dan cakupan per seri
 
-| Kolom | Tipe Data | Wajib Ada | Contoh Nilai | Keterangan |
-|---|---|:---:|---|---|
-| `sumber` | string |Ya| `BPS`, `WHO`, `WDI` | Lembaga atau organisasi asal data mentah |
-| `seri_kode` | string |Ya| `var1394`, `SP.ADO.TFRT` | Kode unik indikator sesuai penamaan sumber aslinya |
-
-### Kolom Wilayah
-
-| Kolom | Tipe Data | Wajib Ada | Contoh Nilai | Keterangan |
-|---|---|:---:|---|---|
-| `wilayah_kode` | integer |Ya| `9999`, `1100`, `3200` | Kode numerik wilayah. `9999` = Indonesia (nasional). Provinsi = kode dua digit BPS × 100. Contoh: `1100` = Aceh, `3200` = Jawa Barat |
-| `nama_wilayah` | string |Ya| `Indonesia`, `Aceh`, `Jawa Barat` | Nama wilayah dari snapshot; `9999` = Indonesia. Snapshot BPS memuat 34 provinsi historis sehingga belum ada baris provinsi hasil pemekaran 2025 |
-
-### Kolom Waktu
-
-| Kolom | Tipe Data | Wajib Ada | Contoh Nilai | Keterangan |
-|---|---|:---:|---|---|
-| `periode` | string |Ya| `2015`, `2020-Q3`, `2020-07` | Periode pengamatan. Format: `YYYY` (tahunan), `YYYY-S1`/`YYYY-S2` (semester), `YYYY-Q1`…`YYYY-Q4` (triwulan), `YYYY-MM` (bulanan) |
-| `jenis_periode` | string |Ya| `tahun`, `triwulan`, `bulan` | Jenis granularitas waktu: `tahun`, `semester`, `triwulan`, atau `bulan` |
-
-### Kolom Nilai
-
-| Kolom | Tipe Data | Wajib Ada | Contoh Nilai | Keterangan |
-|---|---|:---:|---|---|
-| `rincian` | string |Ya| `15-19`, `Laki-laki`, `Total` | Rincian atau sub-kategori pengukuran. Misal: kelompok umur, jenis kelamin. Gunakan `Total` jika tidak ada rincian khusus |
-| `nilai` | float |Ya| `48.5`, `12.3` | Angka hasil pengukuran indikator. Interpretasi bergantung pada `satuan` |
-| `satuan` | string |Boleh kosong| `Persen`, `per 1000 kelahiran hidup` | Satuan pengukuran nilai. Dapat kosong apabila metadata sumber tidak mencantumkan satuan (kasus pada BPS var1353) |
-
-### Kolom Lineage (Keterlacakan Data)
-
-| Kolom | Tipe Data | Wajib Ada | Contoh Nilai | Keterangan |
-|---|---|:---:|---|---|
-| `_berkas_raw` | string |Ya| `bps/2026-10-20/sdg3_3_7_1_v1394.csv` | Path relatif berkas mentah sumber data, diisi otomatis oleh pipeline |
-| `_sha256_raw` | string |Ya| `a3f2c1...` (64 karakter hex) | Checksum SHA-256 berkas mentah untuk verifikasi integritas data. Diambil dari `src.common.manifest.sha256_raw`, **tidak ditulis tangan** |
-
----
-
-## Kunci Unik (Unique Key)
-
-Setiap baris Silver diidentifikasi secara unik oleh kombinasi kolom berikut:
-
-```
-sumber + seri_kode + wilayah_kode + periode + rincian + _berkas_raw
-```
-
-Kombinasi ini tidak boleh duplikat di dalam tabel Silver.
-
----
-
-## Sumber Data & Seri Indikator
-
-| Sumber | Kode Seri | Nama Indikator | Cakupan Wilayah | Periode |
+| seri_kode | satuan | sdg_kode | cakupan | bukti_satuan |
 |---|---|---|---|---|
-| BPS | `var1394` | SDG 3.7.1 — Angka kelahiran remaja (15–19 tahun) | 34 provinsi | 2012–2017 |
-| BPS | `var1353` | SDG 3.7.2 — Prevalensi penggunaan kontrasepsi remaja | 34 provinsi | 2012–2017 |
-| WHO GHO | `MDG_0000000003` | Angka kelahiran remaja (global) | Nasional (Indonesia) | Bervariasi |
-| WHO GHO | `SDGFPALL` | Kebutuhan KB yang terpenuhi (semua metode) | Nasional (Indonesia) | Bervariasi |
-| WDI | `SP.ADO.TFRT` | Angka fertilitas remaja (per 1.000 perempuan 15–19 tahun) | Nasional (Indonesia) | Bervariasi |
+| var1394 | persen | 3.7.1 | perempuan 15–49 atau pasangannya; sumber SDKI (var.note); hanya tahun survei 2012 dan 2017 | var.unit: 'Persen' |
+| var1353 | per_1000_perempuan_seumur | 3.7.2 | umur 15–19 saja (judul var.label; tidak ada kelompok 10–14); sumber IDHS/SDKI (var.note); judul berakhir dengan spasi | var.unit dan kolom satuan CSV kosong; judul menyebut perempuan 15–19; definisi baku indikator yang sama di metadata WHO ('per 1,000 females in the respective age group') dan nama WDI ('births per 1,000 women ages 15-19'); besaran angka (puluhan) sesuai per 1.000, bukan persen |
+| SP.ADO.TFRT | per_1000_perempuan_seumur | 3.7.2 | umur 15–19; estimasi model World Population Prospects (UN Population Division), tahunan | name: '(births per 1,000 women ages 15-19)' |
+| MDG_0000000003 | per_1000_perempuan_seumur | 3.7.2 | perempuan; dua kelompok umur (10–14, 15–19) di kolom rincian; data survei/registrasi, tahun tidak lengkap [dimensi tetap di berkas: DIM_SEX=FEMALE] | kolom RATE_PER_1000_N; UnitOfMeasure: 'Annual number of births per 1000 adolescent women' |
+| SDGFPALL | persen | 3.7.1 | perempuan 15–49; penyebut = permintaan KB total (pemakai semua metode + kebutuhan tak terpenuhi) [dimensi tetap di berkas: DIM_SEX=FEMALE; DIM_AGE=Y15T49] | kolom RATE_PER_100_N |
 
----
+## Kode wilayah
 
-## Catatan Khusus Kasus 03
+9999 = Indonesia; provinsi = kode BPS dua digit x 100, susunan 38 provinsi 2025 (38 kode). WDI menulis Indonesia `ID`/`IDN`, WHO GHO menulis `360` (M49); keduanya dipetakan ke 9999 di `src/wilayah.py`.
 
-> [!NOTE]
-> **Satuan BPS var1353 kosong:** Seluruh 69 baris data BPS var1353 memiliki kolom `satuan` yang tidak terisi di data mentah. Kolom `satuan` dipertahankan kosong dan tidak diisi dengan asumsi, karena memerlukan verifikasi metadata resmi dari sumber BPS. Keputusan ini tercatat di `log-keputusan.csv`.
+## Contoh penelusuran satu baris
 
-> [!NOTE]
-> **Kelompok umur WHO:** `DIM_AGE` dipertahankan di kolom `rincian` bersama `DIM_SEX`, sehingga `10-14`, `15-19`, dan `15-49` tidak digabung. Keputusan ini tercatat di `log-keputusan.csv` (ID: K-004).
+| sumber | seri_kode | wilayah_kode | periode | rincian | nilai | _berkas_raw | _sha256_raw |
+|---|---|---|---|---|---|---|---|
+| bps | var1353 | 1100 | 2012 | total | 25.00 | bps/2026-10-20/json/sdg3_3_7_2_v1353.json | 230ce163135e9ea9e078649b2812136780e9e2db9d4c110dc3e21f2fe50faf5a |
 
-> [!NOTE]
-> **Nilai kosong WDI:** Baris WDI 2025 dengan nilai kosong tidak dimasukkan ke Silver karena Silver hanya memuat observasi yang memiliki nilai. Baris tersebut tetap tersedia di lapisan ekstraksi (ID: K-005).
+1. `_berkas_raw` menunjuk `data/raw/bps/2026-10-20/json/sdg3_3_7_2_v1353.json`.
 
-> [!NOTE]
-> **Pemetaan wilayah:** Provinsi pemekaran dipetakan mengikuti susunan 38 provinsi Indonesia tahun 2025. Aturan pemetaan dicatat di `log-keputusan.csv` (ID: K-002).
+2. Baris berkas itu di `data/raw/MANIFEST.csv` memuat sha256 `230ce163135e…`; nilainya sama dengan `_sha256_raw`, jadi berkas yang dibaca adalah berkas yang tercatat.
 
-> [!NOTE]
-> **Perbedaan definisi antar sumber:** Nilai indikator antara BPS (tingkat provinsi) dan WHO/WDI (nasional) tidak langsung dibandingkan karena perbedaan definisi, metode penghitungan, dan cakupan pengukuran.
-
----
-
-## Riwayat Perubahan
-
-| Tanggal | Perubahan | Oleh |
-|---|---|---|
-| 2026-11-11 | Pembuatan awal data dictionary | Anash Tasya Ausyaqila (124450050) |
-| 2026-11-12 | Menambahkan hasil pipeline Silver dan keputusan WHO/WDI | Queenta Thifaal Nabila (124450059) |
-| 2026-11-12 | Menambahkan artefak profil, anomali, dan boxplot tahap 2 | Risa Romadona (124450127) |
+3. Di berkas mentah, angka ditemukan pada wilayah, periode, dan rincian yang sama (untuk JSON BPS: kunci `datacontent` = kode wilayah + var + turvar + kode tahun + turtahun).
