@@ -1,4 +1,4 @@
-# Laporan perorangan — <Anash Tasya Ausyaqila> (<124450050>), komponen <Validasi dan Dokumentasi>
+# Laporan perorangan — <Anash Tasya Ausyaqila> (124450050), komponen <Validasi dan Dokumentasi>
 
 Salin berkas ini menjadi `reports/individu/<nim>.md`. Paling banyak 1200 kata di luar tabel
 dan kode. Setiap klaim angka harus dapat ditelusuri ke kode atau keluaran yang sudah di-*commit*.
