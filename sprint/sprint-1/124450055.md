@@ -1,0 +1,77 @@
+# LAPORAN SPRINT 1
+## Capstone Data Wrangling — Indikator SDG Indonesia dari Banyak Sumber
+
+### 1. Identitas dan pembagian tugas
+- Nama: Indah Julia Mawar Pratiwi
+- NIM: 124450055
+- Kelompok: 3
+- Kasus: 03 — Kesehatan Reproduksi Remaja
+- Komponen: Integrasi, Penyimpanan, dan Skala Data
+- Repository lokal: `/mnt/c/Users/ACER/capstone-dw-kelompok-03` | Remote: `https://github.com/indahjuliamawarpratiwi/capstone-dw-kelompok-03.git` (branch `main`)
+- Catatan pembagian: penugasan NIM per komponen tidak tercatat eksplisit di repo; implementasi modul tahap 1–4/validasi (sebelumnya stub) diperbaiki untuk memungkinkan pipeline & validasi komponen integrasi/penyimpanan, tanpa menghapus/menimpa pekerjaan anggota lain.
+
+### 2. Tujuan Sprint 1
+Menyiapkan fondasi integrasi dan penyimpanan Kasus 03 yang tervalidasi dan reproducible: verifikasi data mentah & manifest, menghasilkan Silver ber-skema baku dan ber-lineage, memuat Silver ke penyimpanan SQL yang konsisten (tipe/PK/constraint), serta menyiapkan tabel nasional periode×seri dan pasangan rekonsiliasi beserta catatan keterbandingan untuk implementasi penuh di Sprint 2.
+
+### 3. Pekerjaan integrasi dan penyimpanan
+- **Pemeriksaan & sinkronisasi:** verifikasi repo/git, unduh & validasi data kasus 03 (13 berkas sesuai `MANIFEST.csv`/SHA256).
+- **Ekstraksi (Tahap 1, `src/ekstraksi/__init__.py`):** pembacaan setia sumber BPS CSV, WHO datadot CSV (`MDG_0000000003`, `SDGFPALL`), WDI JSON (`SP.ADO.TFRT`, country ID/IDN) + lineage `_berkas_raw/_sha256_raw` via `src.common.manifest`.
+- **Silver (Tahap 2–4, `src/silver/__init__.py`):** normalisasi ke skema minimal (12 kolom), pemisahan rincian/kelompok umur (WHO `Y10T14,Y15T19,Y15T49`; WDI→`Y15T19`), penetapan satuan var1353 dari metadata SDKI (CSV mentah kosong, K-004), filter observasi bernilai numerik, deduplikasi kunci, tulis `data/silver/silver.parquet`.
+- **Koreksi SDGFPALL:** pemilihan kolom nilai WHO per baris/seri (`RATE_PER_1000_N` bila terisi, selain itu `RATE_PER_100_N`) sehingga 6 baris SDGFPALL (2002,2007,2012,2015,2016,2017, Y15T49, Persen) termuat tanpa duplikasi (K-008).
+- **Penyimpanan SQL (Tahap 5, `src/gold/silver_sql.py`, `src/gold/__init__.py`):** SQLite `data/gold/silver.sqlite` tabel `silver` (tipe eksplisit, NOT NULL, CHECK `jenis_periode`, PK komposit `(sumber,seri_kode,wilayah_kode,periode,rincian,_berkas_raw)`, indeks), muat ulang aman `--replace`.
+- **Persiapan Tahap 6 (Sprint 1):** `data/gold/nasional_periode_seri.parquet` (subset nasional 9999) dan `data/gold/pasangan_rekonsiliasi.csv` + catatan keterbandingan (`reports/sprint1/persiapan_tahap6.md`). **Tidak** ada perhitungan selisih rekonsiliasi final.
+- **Lingkungan (reproducible):** interpreter Windows berdependensi `/mnt/c/Users/ACER/capstone-data-wrangling/.venv/Scripts/python.exe` (Python 3.13.7; pandas 3.1.1, pyarrow 26.0.1, duckdb 2.0.0, pandera 0.35.0, matplotlib, openpyxl). `.venv` lokal repo ada tapi tanpa `pip/ensurepip` (instal pip di `/mnt/c` gagal `Operation not permitted`); `requirements.txt` tidak diubah.
+
+> Catatan publikasi: branch `124450055/kerja` memuat artefak hasil + dokumentasi Sprint 1 ini tanpa menimpa modul kode bersama yang dikerjakan anggota tim. Implementasi kode generator berada pada repo lokal (branch `main`).
+
+### 4. Pemeriksaan data raw dan manifest
+- **13 berkas** cocok `data/raw/MANIFEST.csv` (SHA256 tervalidasi, raw tidak diubah). Berkas data observasi: `bps/.../sdg3_3_7_1_v1394.csv`, `bps/.../sdg3_3_7_2_v1353.csv`, `who_gho/.../27D371A_MDG_0000000003.csv` (26 baris), `who_gho/.../8074BD9_SDGFPALL.csv` (6 baris), `wdi/.../kelompok-07-hal-01.json` (SP.ADO.TFRT, country ID).
+- SDGFPALL sumber: 6 baris (2012,2017,2002,2015,2007,2016; Y15T49; `RATE_PER_100_N`) — seluruhnya termuat ke Silver/SQL.
+
+### 5. Hasil Silver dan SQL
+| Artefak | Hasil aktual |
+|---|---|
+| `data/silver/silver.parquet` | **235 baris**, **5 seri**, **35 wilayah**, **5 berkas sumber**, duplikat kunci 0, nilai kosong 0 (skema LOLOS) |
+| `data/gold/silver.sqlite` (tabel `silver`) | **235 baris**, **5 seri**, **11 kolom**, PK `(sumber,seri_kode,wilayah_kode,periode,rincian,_berkas_raw)` OK, duplikat PK 0, NULL/empty 0 |
+| `data/gold/nasional_periode_seri.parquet` | **101 baris** nasional (wilayah 9999), 5 seri |
+
+**Per seri:** bps/var1394 69 (2012,2017, Persen); bps/var1353 69 (2012,2017, per 1.000 perempuan 15–19); who_gho/MDG_0000000003 26 (Y10T14 & Y15T19, 2001–2016 non-kontinu, per 1.000); who_gho/SDGFPALL 6 (Y15T49, 2002,2007,2012,2015,2016,2017, Persen); wdi/SP.ADO.TFRT 65 (Y15T19, 1960–2024, per 1.000 perempuan 15–19). Agregat SQL == Parquet.
+
+### 6. Hasil validasi (angka aktual)
+| Perintah (interpreter kerja) | Hasil | Status |
+|---|---|---|
+| `$PY pipeline.py` | data/raw 13 berkas cocok; ekstraksi→validasi selesai (RC 0), `reports/validasi.md` LOLOS (235 baris, 5 seri, 35 wilayah, 5 berkas) | **Berhasil** |
+| `$PY -m src.common.skema data/silver/silver.parquet` | `LOLOS  235 baris, 5 seri, 35 wilayah, 5 berkas sumber` (RC 0) | **Berhasil** |
+| `$PY src/gold/silver_sql.py --silver data/silver/silver.parquet --db data/gold/silver.sqlite --replace` | `baris_dimuat=235 total_tabel=235 ... LOAD_OK` (RC 0) | **Berhasil** |
+| `$PY -m pip check` | `No broken requirements found.` (RC 0) | **Berhasil** |
+| `python -m src.common.hasil 124450055 pasangan_rekonsiliasi=2 periode_beririsan=2` | `results/124450055/metrics.json` tertulis | **Berhasil** |
+
+### 7. Tabel pasangan rekonsiliasi dan periode irisan (persiapan Sprint 1)
+> Implementasi penuh & perhitungan selisih final = **Sprint 2** (tidak diklaim selesai). Sumber: `data/gold/pasangan_rekonsiliasi.csv`, `reports/sprint1/persiapan_tahap6.md`.
+
+| Pasangan | Sumber/seri | Kelompok umur & populasi | Satuan | Periode irisan (aktual) | Keterbandingan |
+|---|---|---|---|---|---|
+| 1 | bps:var1353; who_gho:MDG_0000000003 (Y15T19); wdi:SP.ADO.TFRT | 15–19 (rincian WHO Y15T19); perempuan 15–19 (SDKI vs estimasi WHO/UN) | per 1.000 perempuan 15–19 (var1353 ditetapkan dari metadata, CSV kosong—perlu konfirmasi) | **3-seri: ∅**; berpasangan var1353∩WDI={2012,2017}; MDG Y15T19 tanpa 2012,2017 | Tidak langsung (tak ada irisan 3-seri, beda metode/vintage) — pembanding kontekstual |
+| 2 | bps:var1394; who_gho:SDGFPALL | 15–49 (Y15T49); mCPR demand satisfied, denominasi/status perkawinan perlu verifikasi | Persen | **{2012,2017}** (2 periode) | Berpotensi dengan verifikasi definisi/denominasi (nilai sumber berbeda jauh) — selisih ditunda Sprint 2 |
+
+### 8. Kendala dan penanganannya
+| Kendala | Penanganan & status |
+|---|---|
+| `ensurepip`/pip tidak tersedia; instal pip di `/mnt/c` gagal `Operation not permitted` | Tidak diulang; digunakan interpreter Windows berdependensi (terdokumentasi). `.venv` lokal tidak diklaim fungsional. **Teratasi (workaround)** |
+| `ModuleNotFoundError: pandas` & pipeline awal `NotImplementedError` Tahap 1 | Implementasi/perbaikan modul tahap 1–4/validasi + run via interpreter kerja. **Teratasi** |
+| **SDGFPALL (6 baris, 2012,2017)** tidak masuk Silver (sebelumnya) | Perbaikan pemilihan kolom nilai WHO per baris/seri (`RATE_PER_1000_N`/`RATE_PER_100_N`), regenerasi Silver/SQL/Gold/validasi. **Teratasi** (235 baris, 5 seri, SDGFPALL=6 di Silver & SQL) |
+| 20 file `M` pre-existing whitespace-only | `git diff -w` kosong; tidak dinormalisasi. **Terkendali** (tidak diubah) |
+
+### 9. Pekerjaan yang belum selesai (dengan bukti)
+- **Rekonsiliasi penuh Tahap 6 (Sprint 2):** perhitungan selisih/tabel rekonsiliasi final, verifikasi satuan var1353 & denominasi/status perkawinan P2, keputusan grid final (bukti: hanya artefak persiapan & catatan, tanpa selisih).
+- **`.venv` lokal fungsional:** pip/ensurepip tidak tersedia & instal terblokir izin (bukti: log venv/get-pip). Reproduksi pakai interpreter Windows terdokumentasi.
+- **Push GitHub:** commit lokal dibuat; push memerlukan kredensial/autentikasi di host (lihat status git). Tidak diklaim berhasil tanpa bukti `branch -vv` sinkron.
+
+### 10. Rencana Sprint 2
+- Implementasi penuh Tahap 6: verifikasi definisi/denominasi/satuan, rekonsiliasi & selisih pada pasangan/periode yang terbukti sebanding (selisih dijelaskan, bukan dihapus), penyimpanan Gold di SQL, validasi skema Gold.
+- Integrasi skala lanjutan (mis. arsip WDI bila relevan) dan pelengkapan dokumentasi/data dictionary dari keluaran final.
+
+### 11. Kesimpulan
+Sprint 1 komponen integrasi & penyimpanan tuntas pada bukti yang dapat diverifikasi: data kasus 03 (13 berkas, manifest cocok) diproses menjadi Silver valid (**235 baris, 5 seri, 35 wilayah, 5 berkas, termasuk SDGFPALL 6 baris**) dan dimuat ke SQLite (**235 baris, PK/constraint/isi konsisten, duplikat 0**) dengan pipeline & validasi skema LOLOS; artefak persiapan Tahap 6, dokumentasi (data dictionary, log K-003..K-008), `metrics.json`, dan laporan ini tersedia. Rekonsiliasi penuh & sebagian aspek lingkungan/push tetap sesuai kendala/batas Sprint 1–2 yang didokumentasikan.
+
+**Reproduksi:** `cd /mnt/c/Users/ACER/capstone-dw-kelompok-03 && PY=/mnt/c/Users/ACER/capstone-data-wrangling/.venv/Scripts/python.exe && $PY pipeline.py && $PY -m src.common.skema data/silver/silver.parquet && $PY src/gold/silver_sql.py --silver data/silver/silver.parquet --db data/gold/silver.sqlite --replace`
