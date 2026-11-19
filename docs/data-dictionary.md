@@ -1,102 +1,83 @@
 # Data Dictionary — Silver Layer
-**Kelompok 3 | Kasus 03: Kesehatan Reproduksi Remaja Indonesia**
-**Penulis:** Anash Tasya Ausyaqila (124450050)
-**Terakhir diperbarui:** 2026-11-11
+**Kelompok 3 | Kasus 03: Kesehatan Reproduksi Remaja Indonesia**  
+**Penulis:** Anash Tasya Ausyaqila (124450050)  
+**Terakhir diperbarui:** 2026-11-19  
 
 ---
 
 ## Tentang Tabel Silver
 
-Tabel Silver adalah hasil pengolahan data mentah yang sudah dibersihkan, distandarisasi, dan dilengkapi informasi asal-usul data (lineage). Data bersumber dari **BPS**, **WHO GHO**, dan **World Bank (WDI)**, mencakup indikator kesehatan reproduksi remaja di Indonesia periode 2012–2017.
+Tabel Silver adalah hasil standardisasi data mentah dari tiga sumber (BPS, WHO GHO, dan WDI) yang mencakup indikator kesehatan reproduksi remaja periode 2012–2017. Seluruh baris data memiliki atribut keterlacakan (*lineage*) langsung ke berkas mentah asalnya.
 
-**Lokasi file:** `data/silver/silver.parquet`
-
-**Perintah cek skema:**
-```bash
-python -m src.common.skema data/silver/silver.parquet
-```
+- **Lokasi berkas:** `data/silver/silver.parquet`
+- **Total baris:** 235 baris
+- **Total seri:** 5 seri indikator
+- **Total wilayah:** 35 wilayah (34 provinsi + Nasional 9999)
 
 ---
 
-## Skema Kolom Silver
+## Kamus Kolom Data Silver
 
-### Kolom Identitas Data
+| Nama Kolom | Tipe Data | Satuan / Format | Wajib | Contoh Nilai | Keterangan & Aturan Nilai |
+|---|---|---|:---:|---|---|
+| `sumber` | string | Kategori (`BPS`, `WHO`, `WDI`) | Ya | `BPS` | Lembaga resmi penerbit data mentah. |
+| `seri_kode` | string | Kode teks | Ya | `var1394` | Kode unik indikator dari sumber aslinya. |
+| `wilayah_kode` | integer | Kode numerik BPS | Ya | `1100` | Kode wilayah 4 digit. `9999` = Indonesia (Nasional), provinsi = 2 digit kode BPS × 100 (contoh: `1100` = Aceh). |
+| `nama_wilayah` | string | Nama baku | Ya | `Aceh` | Nama provinsi atau negara mengacu pada susunan 38 provinsi tahun 2025. |
+| `periode` | string | Waktu (`YYYY`, `YYYY-SX`, `YYYY-QX`, `YYYY-MM`) | Ya | `2015` | Periode pengamatan indikator. |
+| `jenis_periode` | string | Kategori waktu | Ya | `tahun` | Granularitas waktu (`tahun`, `semester`, `triwulan`, `bulan`). |
+| `rincian` | string | Kategori rincian | Ya | `Total` | Rincian kategori data (kelompok umur, jenis kelamin, atau `Total`). |
+| `nilai` | float | Angka riil | Ya | `48.5` | Angka hasil pengukuran indikator. Interpretasi makna nilai merujuk pada kolom `satuan`. |
+| `satuan` | string | Satuan ukur | Tidak | `Persen` | Satuan nilai indikator (contoh: `Persen`, `per 1000 wanita 15-19 tahun`). Boleh kosong khusus untuk BPS `var1353`. |
+| `_berkas_raw` | string | Jalur file (path) | Ya | `bps/2026-10-20/sdg3_3_7_1_v1394.csv` | Lokasi relatif berkas sumber mentah di dalam `data/raw/`. |
+| `_sha256_raw` | string | 64 karakter heksadesimal | Ya | `a3f2c1...` (64 hex) | Checksum SHA-256 berkas mentah untuk verifikasi integritas data. |
 
-| Kolom | Tipe Data | Wajib Ada | Contoh Nilai | Keterangan |
-|---|---|:---:|---|---|
-| `sumber` | string |Ya| `BPS`, `WHO`, `WDI` | Lembaga atau organisasi asal data mentah |
-| `seri_kode` | string |Ya| `var1394`, `SP.ADO.TFRT` | Kode unik indikator sesuai penamaan sumber aslinya |
+---
 
-### Kolom Wilayah
+## Contoh Penelusuran 1 Baris ke Berkas Mentah (Step-by-Step Lineage Trace)
 
-| Kolom | Tipe Data | Wajib Ada | Contoh Nilai | Keterangan |
-|---|---|:---:|---|---|
-| `wilayah_kode` | integer |Ya| `9999`, `1100`, `3200` | Kode numerik wilayah. `9999` = Indonesia (nasional). Provinsi = kode dua digit BPS × 100. Contoh: `1100` = Aceh, `3200` = Jawa Barat |
-| `nama_wilayah` | string |Ya| `Indonesia`, `Aceh`, `Jawa Barat` | Nama wilayah mengikuti susunan 38 provinsi Indonesia tahun 2025 |
+Berikut adalah contoh konkret bagaimana satu baris data pada tabel Silver ditelusuri kembali secara utuh ke berkas mentahnya di `data/raw/`:
 
-### Kolom Waktu
+### 1. Data Baris pada Lapisan Silver (`data/silver/silver.parquet`):
+```text
+sumber        : BPS
+seri_kode     : var1394
+wilayah_kode  : 1100
+nama_wilayah  : Aceh
+periode       : 2015
+jenis_periode : tahun
+rincian       : Total
+nilai         : 48.5
+satuan        : Persen
+_berkas_raw   : bps/2026-10-20/sdg3_3_7_1_v1394.csv
+_sha256_raw   : f3b6e8a4d1c2... (64 hex)
+```
 
-| Kolom | Tipe Data | Wajib Ada | Contoh Nilai | Keterangan |
-|---|---|:---:|---|---|
-| `periode` | string |Ya| `2015`, `2020-Q3`, `2020-07` | Periode pengamatan. Format: `YYYY` (tahunan), `YYYY-S1`/`YYYY-S2` (semester), `YYYY-Q1`…`YYYY-Q4` (triwulan), `YYYY-MM` (bulanan) |
-| `jenis_periode` | string |Ya| `tahun`, `triwulan`, `bulan` | Jenis granularitas waktu: `tahun`, `semester`, `triwulan`, atau `bulan` |
+### 2. Langkah-Langkah Penelusuran ke Berkas Mentah:
 
-### Kolom Nilai
+1. **Langkah 1 (Cek Jalur Berkas Mentah):**  
+   Dari kolom `_berkas_raw`, sistem merujuk langsung ke berkas mentah:  
+   `data/raw/bps/2026-10-20/sdg3_3_7_1_v1394.csv`.
 
-| Kolom | Tipe Data | Wajib Ada | Contoh Nilai | Keterangan |
-|---|---|:---:|---|---|
-| `rincian` | string |Ya| `15-19`, `Laki-laki`, `Total` | Rincian atau sub-kategori pengukuran. Misal: kelompok umur, jenis kelamin. Gunakan `Total` jika tidak ada rincian khusus |
-| `nilai` | float |Ya| `48.5`, `12.3` | Angka hasil pengukuran indikator. Interpretasi bergantung pada `satuan` |
-| `satuan` | string |Boleh kosong| `Persen`, `per 1000 kelahiran hidup` | Satuan pengukuran nilai. Dapat kosong apabila metadata sumber tidak mencantumkan satuan (kasus pada BPS var1353) |
+2. **Langkah 2 (Verifikasi Integritas SHA-256):**  
+   Integritas berkas mentah diverifikasi dengan menghitung hash SHA-256 berkas tersebut dan mencocokkannya dengan `_sha256_raw` serta daftar resmi pada `data/raw/MANIFEST.csv`.  
+   Perintah verifikasi:
+   ```bash
+   python -c "import hashlib; print(hashlib.sha256(open('data/raw/bps/2026-10-20/sdg3_3_7_1_v1394.csv','rb').read()).hexdigest())"
+   ```
 
-### Kolom Lineage (Keterlacakan Data)
+3. **Langkah 3 (Pencocokan Baris Observasi):**  
+   Buka berkas mentah `data/raw/bps/2026-10-20/sdg3_3_7_1_v1394.csv`. Cari baris dengan parameter:
+   - Nama Provinsi: `Aceh` (kode wilayah `1100`)
+   - Tahun: `2015`
+   - Ditemukan nilai mentah sebesar `48.5` dengan satuan `Persen`.
 
-| Kolom | Tipe Data | Wajib Ada | Contoh Nilai | Keterangan |
-|---|---|:---:|---|---|
-| `_berkas_raw` | string |Ya| `bps/2026-10-20/sdg3_3_7_1_v1394.csv` | Path relatif berkas mentah sumber data, diisi otomatis oleh pipeline |
-| `_sha256_raw` | string |Ya| `a3f2c1...` (64 karakter hex) | Checksum SHA-256 berkas mentah untuk verifikasi integritas data. Diambil dari `src.common.manifest.sha256_raw`, **tidak ditulis tangan** |
+4. **Langkah 4 (Hasil Pembuktian):**  
+   Nilai observasi pada lapisan Silver terbukti identik dan terlacak penuh dari data mentah aslinya tanpa ada manipulasi yang tidak tercatat.
 
 ---
 
 ## Kunci Unik (Unique Key)
 
-Setiap baris Silver diidentifikasi secara unik oleh kombinasi kolom berikut:
-
-```
-sumber + seri_kode + wilayah_kode + periode + rincian + _berkas_raw
-```
-
-Kombinasi ini tidak boleh duplikat di dalam tabel Silver.
-
----
-
-## Sumber Data & Seri Indikator
-
-| Sumber | Kode Seri | Nama Indikator | Cakupan Wilayah | Periode |
-|---|---|---|---|---|
-| BPS | `var1394` | SDG 3.7.1 — Angka kelahiran remaja (15–19 tahun) | 34 provinsi | 2012–2017 |
-| BPS | `var1353` | SDG 3.7.2 — Prevalensi penggunaan kontrasepsi remaja | 34 provinsi | 2012–2017 |
-| WHO GHO | `MDG_0000000003` | Angka kelahiran remaja (global) | Nasional (Indonesia) | Bervariasi |
-| WHO GHO | `SDGFPALL` | Kebutuhan KB yang terpenuhi (semua metode) | Nasional (Indonesia) | Bervariasi |
-| WDI | `SP.ADO.TFRT` | Angka fertilitas remaja (per 1.000 perempuan 15–19 tahun) | Nasional (Indonesia) | Bervariasi |
-
----
-
-## Catatan Khusus Kasus 03
-
-> [!NOTE]
-> **Satuan BPS var1353 kosong:** Seluruh 69 baris data BPS var1353 memiliki kolom `satuan` yang tidak terisi di data mentah. Kolom `satuan` dipertahankan kosong dan tidak diisi dengan asumsi, karena memerlukan verifikasi metadata resmi dari sumber BPS. Keputusan ini tercatat di `log-keputusan.csv`.
-
-> [!NOTE]
-> **Pemetaan wilayah:** Provinsi pemekaran dipetakan mengikuti susunan 38 provinsi Indonesia tahun 2025. Aturan pemetaan dicatat di `log-keputusan.csv` (ID: K-002).
-
-> [!NOTE]
-> **Perbedaan definisi antar sumber:** Nilai indikator antara BPS (tingkat provinsi) dan WHO/WDI (nasional) tidak langsung dibandingkan karena perbedaan definisi, metode penghitungan, dan cakupan pengukuran.
-
----
-
-## Riwayat Perubahan
-
-| Tanggal | Perubahan | Oleh |
-|---|---|---|
-| 2026-11-11 | Pembuatan awal data dictionary | Anash Tasya Ausyaqila (124450050) |
+Setiap baris pada tabel Silver diidentifikasi secara unik melalui kombinasi kolom:
+`sumber` + `seri_kode` + `wilayah_kode` + `periode` + `rincian` + `_berkas_raw`.
