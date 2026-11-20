@@ -1,0 +1,7 @@
+data/raw: 13 berkas cocok dengan MANIFEST.csv
+ekstraksi  selesai dalam 0.1 s
+           Silver: 235 baris -> data\silver\silver.parquet
+silver     selesai dalam 0.6 s
+gold       selesai dalam 0.1 s
+validasi   selesai dalam 0.1 s
+Periksa skema minimal: python -m src.common.skema data/silver/silver.parquet
