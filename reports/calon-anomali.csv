@@ -1,0 +1,4 @@
+seri_kode,wilayah_kode,nama_wilayah,periode,nilai,arah,alasan,berulang
+var1353,6200,Kalimantan Tengah,2017,83.0,ke bawah,"di luar [-1.75, 82.25] (IQR x 1.5) dibanding 34 provinsi tahun itu",False
+var1394,9400,Papua,2012,19.1,ke bawah,"di luar [27.00, 83.00] (IQR x 1.5) dibanding 33 provinsi tahun itu",False
+var1394,9400,Papua,2017,35.9,perubahan,"perubahan 2012→2017 sebesar +16.80 di luar [-8.80, 7.20]",False

@@ -1,245 +1,236 @@
-"""Pembaca CSV dan JSON WebAPI BPS untuk tahap 1 (ekstraksi).
+"""Pembaca BPS: JSON WebAPI (respons asli, berhalaman) dan CSV hasil ratakan.
 
-Pembaca ini hanya meratakan struktur dan mencatat asal baris. Tidak ada pembersihan, deduplikasi,
-imputasi, atau penggabungan nilai antarberkas. Setiap baris membawa `_berkas_raw` (relatif
-data/raw/) dan `_sha256_raw` (dari src.common.manifest), sehingga CSV dan JSON untuk seri yang
-sama tetap muncul sebagai baris terpisah.
-
-Jumlah baris snapshot 2026-10-20 (baris header CSV tidak dihitung):
-
-- bps/2026-10-20/sdg3_3_7_1_v1394.csv        69
-- bps/2026-10-20/sdg3_3_7_2_v1353.csv        69
-- bps/2026-10-20/json/sdg3_3_7_1_v1394.json  69
-- bps/2026-10-20/json/sdg3_3_7_2_v1353.json  69
-
-Total 276 baris. Berkas `manifest_asal.json` adalah metadata, bukan tabel data, jadi tidak
-dimasukkan ke tabel data. Pembaca metadata membacanya terpisah: 36 entri tabel, disaring menjadi
-2 entri yang sesuai dengan var 1394 dan 1353.
-
-Catatan kasus 4.2: judul tabel var1353 di JSON adalah "Angka Kelahiran Pada Perempuan Usia
-15-19 Tahun Menurut Provinsi". Kelompok umur yang benar-benar dicakup adalah 15-19 tahun,
-bukan 15-49 tahun. Judul itu tidak diubah oleh pembaca ini.
+Pembaca tidak membersihkan apa pun. Keluarannya tabel panjang yang setia pada berkas, ditambah
+_berkas_raw dan _sha256_raw. Metadata seri (judul, satuan, catatan) dibaca ke tabel terpisah.
 """
-import csv
-import io
+import html
 import json
-from pathlib import Path
+import re
+from html.parser import HTMLParser
 
 import pandas as pd
 
-from src.common.manifest import RAW
-from ._umum import baca_teks, ke_angka, tempel_lineage
-
-KOLOM_ASAL = [
-    "var_id", "wilayah_id", "wilayah", "turvar_id", "turvar",
-    "tahun_id", "tahun", "periode_id", "periode", "nilai", "satuan",
-]
+from src.common.manifest import RAW, sha256_raw
 
 
-def _deteksi_pemisah(teks):
-    """Deteksi delimiter CSV dari beberapa baris pertama; fallback ke koma."""
-    contoh = "\n".join(teks.splitlines()[:5])
-    try:
-        return csv.Sniffer().sniff(contoh, delimiters=",;\t|").delimiter
-    except csv.Error:
-        return ","
+def _kamus(daftar):
+    """[{'val': 1100, 'label': 'ACEH'}, ...] -> {'1100': 'ACEH'} dengan kode sebagai teks."""
+    return {str(x["val"]): x["label"] for x in daftar}
 
 
-def _ke_int(nilai):
-    """Ubah ID/kode numerik menjadi bilangan bulat; kosong menjadi NA."""
-    if nilai is None:
-        return pd.NA
-    teks = str(nilai).strip()
-    if not teks:
-        return pd.NA
-    angka = float(teks)
-    if not angka.is_integer():
-        raise ValueError(f"nilai bukan bilangan bulat: {nilai!r}")
-    return int(angka)
+def potong_kunci(kunci, kode_var, wilayah, rincian, tahun, periode):
+    """Potong kunci datacontent = wilayah + var + turvar + tahun + turtahun (bersambung tanpa pemisah).
 
-
-def _tahun(label):
-    """Label tahun JSON berupa teks; samakan tipenya dengan kolom tahun CSV."""
-    teks = str(label).strip()
-    try:
-        return _ke_int(teks)
-    except ValueError:
-        return label
-
-
-def _kode(nilai):
-    """Representasi nilai dimensi untuk menyusun kunci datacontent."""
-    if isinstance(nilai, float) and nilai.is_integer():
-        nilai = int(nilai)
-    return str(nilai)
-
-
-def _peta_dimensi(obj, path):
-    """Peta kunci datacontent -> metadata dimensi.
-
-    Kunci WebAPI BPS adalah gabungan langsung (tanpa padding) dari nilai
-    vervar + var + turvar + tahun + turtahun. Panjang tiap bagian dapat berbeda,
-    jadi peta dibangun dari kombinasi nilai yang tercantum di metadata.
+    Panjang setiap potongan diambil dari panjang kode di daftar labelnya, bukan dihafal. Satu daftar bisa
+    berisi kode dengan panjang berbeda (misalnya kode tahun 93–99 dua digit dan 100 ke atas tiga digit),
+    jadi semua kombinasi panjang dicoba dan hanya potongan yang semua bagiannya ada di daftar yang diterima.
+    Lebih dari satu potongan yang sah: pembaca berhenti (ambigu). Tidak ada potongan yang sah: None, dan
+    kunci itu dilaporkan oleh baca_json (bukan diam-diam dibuang).
     """
-    nama = ("vervar", "var", "turvar", "tahun", "turtahun")
-    dimensi = {}
-    for kunci in nama:
-        isi = obj.get(kunci) or []
-        if not isi:
-            raise ValueError(f"{path}: metadata {kunci!r} kosong")
-        dimensi[kunci] = isi
-
-    peta = {}
-    for vervar in dimensi["vervar"]:
-        for var in dimensi["var"]:
-            for turvar in dimensi["turvar"]:
-                for tahun in dimensi["tahun"]:
-                    for turtahun in dimensi["turtahun"]:
-                        kunci = "".join(
-                            _kode(x["val"]) for x in (vervar, var, turvar, tahun, turtahun)
-                        )
-                        if kunci in peta:
-                            raise ValueError(f"{path}: kunci datacontent ambigu ({kunci})")
-                        peta[kunci] = (vervar, var, turvar, tahun, turtahun)
-    return peta
+    pjg = lambda kamus: sorted({len(k) for k in kamus})  # noqa: E731
+    sah = []
+    for lw in pjg(wilayah):
+        for lr in pjg(rincian):
+            for lp in pjg(periode):
+                lt = len(kunci) - lw - len(kode_var) - lr - lp
+                if lt not in pjg(tahun):
+                    continue
+                i = 0
+                k_wil = kunci[i:i + lw]; i += lw
+                k_var = kunci[i:i + len(kode_var)]; i += len(kode_var)
+                k_rin = kunci[i:i + lr]; i += lr
+                k_th = kunci[i:i + lt]; i += lt
+                k_per = kunci[i:]
+                if k_var == kode_var and k_wil in wilayah and k_rin in rincian and k_th in tahun and k_per in periode:
+                    sah.append((k_wil, k_rin, k_th, k_per))
+    if len(sah) > 1:
+        raise ValueError(f"kunci {kunci}: {len(sah)} cara memotong yang sah (seharusnya tepat satu)")
+    return sah[0] if sah else None
 
 
-def baca_csv(path, raw=RAW):
-    """Baca satu CSV BPS menjadi tabel panjang dengan kolom asal + lineage."""
-    path = Path(path)
-    teks = baca_teks(path)
-    pembaca = csv.DictReader(io.StringIO(teks), delimiter=_deteksi_pemisah(teks))
-
-    baris = []
-    for asal in pembaca:
-        baris.append({
-            "var_id": _ke_int(asal.get("var_id")),
-            "wilayah_id": _ke_int(asal.get("wilayah_id")),
-            "wilayah": asal.get("wilayah"),
-            "turvar_id": _ke_int(asal.get("turvar_id")),
-            "turvar": asal.get("turvar"),
-            "tahun_id": _ke_int(asal.get("tahun_id")),
-            "tahun": _ke_int(asal.get("tahun")),
-            "periode_id": _ke_int(asal.get("periode_id")),
-            "periode": asal.get("periode"),
-            "nilai": ke_angka(asal.get("nilai")),
-            "satuan": asal.get("satuan", ""),
-        })
-
-    df = pd.DataFrame(baris, columns=KOLOM_ASAL)
-    return tempel_lineage(df, path, raw)
+tak_terbaca = []      # kunci datacontent yang tidak cocok dengan daftar label (dilaporkan di reports/)
 
 
-def baca_json(path, raw=RAW):
-    """Baca satu JSON WebAPI BPS dan ratakan vervar/turvar/tahun/datacontent."""
-    path = Path(path)
-    isi = json.loads(baca_teks(path))
-    if isinstance(isi, dict):
-        isi = [isi]
-
-    baris = []
-    for obj in isi:
-        status = obj.get("status")
-        if status is not None and status != "OK":
-            raise ValueError(f"{path}: status WebAPI BPS bukan OK ({status!r})")
-        peta = _peta_dimensi(obj, path)
-        for kunci, nilai in (obj.get("datacontent") or {}).items():
-            dimensi = peta.get(str(kunci))
-            if dimensi is None:
-                raise ValueError(
-                    f"{path}: kunci datacontent {kunci!r} tidak cocok dengan metadata"
-                )
-            vervar, var, turvar, tahun, turtahun = dimensi
-            baris.append({
-                "var_id": _ke_int(var["val"]),
-                "wilayah_id": _ke_int(vervar["val"]),
-                "wilayah": vervar["label"],
-                "turvar_id": _ke_int(turvar["val"]),
-                "turvar": turvar["label"],
-                "tahun_id": _ke_int(tahun["val"]),
-                "tahun": _tahun(tahun["label"]),
-                "periode_id": _ke_int(turtahun["val"]),
-                "periode": turtahun["label"],
-                "nilai": ke_angka(nilai),
-                "satuan": var.get("unit", ""),
-            })
-
-    df = pd.DataFrame(baris, columns=KOLOM_ASAL)
-    return tempel_lineage(df, path, raw)
-
-
-def baca_berkas(path, raw=RAW):
-    """Pilih pembaca berdasarkan ekstensi berkas."""
-    path = Path(path)
-    if path.suffix.lower() == ".csv":
-        return baca_csv(path, raw)
-    if path.suffix.lower() == ".json":
-        return baca_json(path, raw)
-    raise ValueError(f"format BPS tidak dikenal: {path}")
-
-
-def baca_semua(raw=RAW):
-    """Baca semua berkas CSV dan JSON BPS di data/raw/bps/ tanpa membersihkan apa pun."""
-    raw = Path(raw)
-    akar = raw / "bps"
-    if not akar.is_dir():
-        raise FileNotFoundError(f"folder BPS tidak ditemukan: {akar}")
-
-    berkas = sorted({*akar.glob("**/*.csv"), *akar.glob("**/json/*.json")})
-    berkas = [p for p in berkas if not p.name.startswith("manifest")]
-    if not berkas:
-        raise FileNotFoundError(f"tidak ada berkas CSV/JSON BPS di {akar}")
-
-    return pd.concat([baca_berkas(p, raw) for p in berkas], ignore_index=True)
-
-
-def _berkas_metadata(raw):
-    akar = Path(raw) / "bps"
-    berkas = sorted(akar.glob("**/manifest_asal.json"))
-    if not berkas:
-        raise FileNotFoundError(f"manifest metadata BPS tidak ditemukan di {akar}")
-    return berkas
-
-
-def baca_metadata(path, raw=RAW, var_relevan=None):
-    """Baca metadata manifest BPS dan ratakan entri `tabel` menjadi baris."""
-    path = Path(path)
-    isi = json.loads(baca_teks(path))
-    if not isinstance(isi, dict) or not isinstance(isi.get("tabel"), dict):
-        raise ValueError(f"{path}: struktur manifest BPS tidak dikenal")
-
-    baris = []
-    for nama, tabel in isi["tabel"].items():
-        if var_relevan is not None and str(tabel.get("var")) not in var_relevan:
-            continue
-        rekaman = {"nama_tabel": nama}
-        for kunci, nilai in isi.items():
-            if kunci != "tabel":
-                rekaman[kunci] = nilai
-        rekaman.update(tabel)
-        baris.append(rekaman)
-
+def baca_json(jalur):
+    """Baca satu JSON WebAPI BPS. Mengembalikan (data_panjang, metadata_seri)."""
+    halaman_semua = json.loads((RAW / jalur).read_text(encoding="utf-8"))
+    baris, meta = [], []
+    for no_hal, hal in enumerate(halaman_semua, start=1):
+        var = hal["var"][0]
+        wilayah = _kamus(hal["vervar"])
+        rincian = _kamus(hal["turvar"])
+        tahun = _kamus(hal["tahun"])
+        periode = _kamus(hal["turtahun"])
+        kode_var = str(var["val"])
+        for kunci, nilai in hal["datacontent"].items():
+            potong = potong_kunci(kunci, kode_var, wilayah, rincian, tahun, periode)
+            if potong is None:
+                tak_terbaca.append({"_berkas_raw": jalur, "halaman": no_hal, "kunci": kunci, "nilai": nilai})
+                continue
+            k_wil, k_rin, k_th, k_per = potong
+            baris.append({"var_id": kode_var, "wilayah_id": k_wil, "wilayah": wilayah[k_wil],
+                          "turvar_id": k_rin, "turvar": rincian[k_rin], "tahun_id": k_th, "tahun": tahun[k_th],
+                          "turtahun_id": k_per, "turtahun": periode[k_per], "nilai": nilai, "_halaman": no_hal})
+        meta.append({"var_id": kode_var, "judul": var["label"], "satuan": var.get("unit", ""),
+                     "catatan": var.get("note", ""), "definisi": var.get("def", ""), "desimal": var.get("decimal"),
+                     "last_update": hal.get("last_update"), "tahun_terbit": ",".join(tahun.values()),
+                     "_halaman": no_hal})
     df = pd.DataFrame(baris)
-    return tempel_lineage(df, path, raw)
+    df["_berkas_raw"] = jalur
+    df["_sha256_raw"] = sha256_raw(jalur)
+    m = pd.DataFrame(meta)
+    m["_berkas_raw"] = jalur
+    return df, m
 
 
-def baca_metadata_semua(raw=RAW, var_relevan=None):
-    """Baca semua manifest metadata BPS; saring ke var yang ada di data bila diberikan."""
-    if var_relevan is None:
-        data = baca_semua(raw)
-        var_relevan = {str(x) for x in data["var_id"].dropna()}
-    return pd.concat(
-        [baca_metadata(p, raw, var_relevan) for p in _berkas_metadata(raw)],
-        ignore_index=True,
-    )
+def statis(jalur):
+    """True bila JSON adalah tabel statis (kunci 'data' berisi tabel HTML), bukan respons tabel dinamis."""
+    isi = json.loads((RAW / jalur).read_text(encoding="utf-8"))
+    return isinstance(isi, dict) and isinstance(isi.get("data"), dict) and "table" in isi["data"]
 
 
-if __name__ == "__main__":
-    hasil = baca_semua()
-    print(hasil.groupby("_berkas_raw", sort=True).size().to_string())
-    print(f"total {len(hasil)} baris")
-    metadata = baca_metadata_semua(
-        var_relevan={str(x) for x in hasil["var_id"].dropna()}
-    )
-    print(metadata.groupby("_berkas_raw", sort=True).size().to_string())
-    print(f"total metadata {len(metadata)} baris")
+class _PembacaTabel(HTMLParser):
+    """Kumpulkan sel <tr>/<td> beserta colspan dan rowspan (pustaka standar, tanpa lxml)."""
+
+    def __init__(self):
+        super().__init__()
+        self.baris, self.sel = [], None
+
+    def handle_starttag(self, tag, attrs):
+        a = dict(attrs)
+        if tag == "tr":
+            self.baris.append([])
+        elif tag in ("td", "th") and self.baris:
+            self.sel = {"teks": "", "colspan": int(a.get("colspan") or 1), "rowspan": int(a.get("rowspan") or 1)}
+
+    def handle_endtag(self, tag):
+        if tag in ("td", "th") and self.sel is not None:
+            self.baris[-1].append(self.sel)
+            self.sel = None
+
+    def handle_data(self, data):
+        if self.sel is not None:
+            self.sel["teks"] += data
+
+
+def grid_html(teks):
+    """Tabel HTML -> daftar baris berisi teks sel, dengan colspan/rowspan diratakan ke setiap kolom."""
+    p = _PembacaTabel()
+    p.feed(html.unescape(teks))
+    hasil, tunda = [], {}
+    for sel_baris in p.baris:
+        baris, kol, i = [], 0, 0
+        while i < len(sel_baris) or kol in tunda:
+            if kol in tunda:
+                isi, sisa = tunda.pop(kol)
+                baris.append(isi)
+                if sisa > 1:
+                    tunda[kol] = (isi, sisa - 1)
+                kol += 1
+                continue
+            s = sel_baris[i]
+            i += 1
+            isi = re.sub(r"\s+", " ", s["teks"].replace("\xa0", " ")).strip()
+            for _ in range(s["colspan"]):
+                baris.append(isi)
+                if s["rowspan"] > 1:
+                    tunda[kol] = (isi, s["rowspan"] - 1)
+                kol += 1
+        hasil.append(baris)
+    return hasil
+
+
+def angka_html(teks):
+    """'3 156.7' -> 3156.7; '1,234.5' -> 1234.5; '77,94' -> 77.94; '-' atau kosong -> None.
+
+    Ribuan di tabel statis BPS dipisah spasi, jadi koma tanpa titik dibaca sebagai koma desimal
+    (satu tabel bisa mencampur titik dan koma desimal antarkolom)."""
+    t = str(teks).replace(" ", "")
+    if "," in t and "." in t:
+        t = t.replace(",", "")
+    elif "," in t:
+        t = t.replace(",", ".")
+    try:
+        return float(t)
+    except ValueError:
+        return None
+
+
+def baca_json_statis(jalur):
+    """Tabel statis: JSON berisi tabel HTML Excel yang di-escape. Diratakan menjadi tabel panjang:
+    satu baris per (wilayah, kolom), kolom h1..hN = isi baris header bertingkat di atas kolom itu.
+    Baris data = baris yang sel namanya dikenali sebagai wilayah; baris judul, nomor kolom (1), (2), ...,
+    catatan, dan sumber dilewati. Tabel yang terdiri atas beberapa blok bertumpuk (header berulang) dibaca
+    blok demi blok. Nilai '-' dibawa sebagai teks (artinya ditentukan saat menyusun Silver)."""
+    from src import wilayah as W
+    d = json.loads((RAW / jalur).read_text(encoding="utf-8"))["data"]
+    g = grid_html(d["table"])
+
+    def kode(teks):
+        try:
+            return W.dari_nama(teks)
+        except KeyError:
+            return None
+    data = {}
+    for i, r in enumerate(g):
+        for j, c in enumerate(r[:3]):
+            if c and kode(c) is not None:
+                data[i] = (j, kode(c))      # sel nama pertama di baris (nama bisa melebar beberapa kolom)
+                break
+    if not data:
+        raise ValueError(f"{jalur}: tidak ada baris wilayah yang dikenali")
+    # kolom nama = posisi yang paling sering memuat nama wilayah (baris Indonesia bisa melebar ke kolom nomor)
+    posisi = [j for j, _ in data.values()]
+    kol_nama = max(set(posisi), key=posisi.count)
+    data = {i: (kol_nama, kode(g[i][kol_nama])) for i in data if kol_nama < len(g[i]) and kode(g[i][kol_nama]) is not None}
+
+    def baris_header(r):
+        return (len({c for c in r if c}) > 1 and any(c for c in r[kol_nama + 1:])
+                and not re.fullmatch(r"\(\d+\)", r[-1] or ""))
+    # tabel bisa berisi beberapa blok bertumpuk, masing-masing dengan baris header sendiri:
+    # header aktif diganti setiap kali baris header muncul lagi sesudah baris data
+    baris, header, sesudah_data, blok = [], [], False, 0
+    for i, r in enumerate(g):
+        if i in data and data[i][0] == kol_nama:
+            sesudah_data = True
+            for c in range(kol_nama + 1, len(r)):
+                if not r[c]:
+                    continue
+                judul = [h[c] if c < len(h) else "" for h in header]
+                if not judul or any(x == "" for x in judul):
+                    continue
+                baris.append({"wilayah": r[kol_nama], "wilayah_kode": data[i][1], "blok": blok,
+                              **{f"h{n + 1}": x for n, x in enumerate(judul)},
+                              "nilai_teks": r[c], "nilai": angka_html(r[c])})
+        elif i not in data and baris_header(r):
+            if sesudah_data:
+                header, sesudah_data, blok = [], False, blok + 1
+            header.append(r)
+    df = pd.DataFrame(baris)
+    df["_berkas_raw"] = jalur
+    df["_sha256_raw"] = sha256_raw(jalur)
+    meta = pd.DataFrame([{k: d.get(k) for k in ("table_id", "title", "subcsa", "cr_date", "updt_date", "size")}])
+    meta["_berkas_raw"] = jalur
+    meta["tingkat_header"] = len(header)
+    meta["sel_koma_desimal"] = int(df["nilai_teks"].str.fullmatch(r"-?[\d ]+,\d+").sum()) if len(df) else 0
+    meta["blok"] = blok + 1
+    return df, meta
+
+
+def baca_csv(jalur):
+    """Baca satu CSV BPS apa adanya (semua kolom sebagai teks)."""
+    df = pd.read_csv(RAW / jalur, dtype=str, keep_default_na=False, encoding="utf-8")
+    df["_berkas_raw"] = jalur
+    df["_sha256_raw"] = sha256_raw(jalur)
+    return df
+
+
+def baca_manifest_asal(jalur):
+    """manifest_asal.json: catatan unduhan BPS untuk semua tabel (bukan hanya tabel kasus ini)."""
+    isi = json.loads((RAW / jalur).read_text(encoding="utf-8"))
+    baris = [{"tabel": nama, **{k: (",".join(map(str, v)) if isinstance(v, list) else v) for k, v in t.items()}}
+             for nama, t in isi["tabel"].items()]
+    df = pd.DataFrame(baris)
+    df["_berkas_raw"] = jalur
+    return df
+
