@@ -111,7 +111,7 @@ Rincian yang kandidat sebanding:
 - **`MDG_0000000003` (Y15T19) ↔ `var1353`**: umur dan satuan sama, tetapi **tidak ada tahun observasi yang benar-benar beririsan**. Nilai 2012 tidak tersedia di WHO, dan 2017 berada di luar cakupan WHO (berhenti 2016). Nilai terdekat adalah 2016 sebesar 36,11 per 1.000, berdekatan dengan BPS 2017 sebesar 36.
 - **`MDG_0000000003` (Y10T14)** ditolak sebagai pembanding `var1353` karena kelompok umurnya berbeda.
 
-Grafik pembanding: [`gambar/pembanding_nasional.png`](gambar/pembanding_nasional.png).
+Grafik pembanding: [`gambar/pembanding_nasional.png`](gambar/pembanding_nasional.png). Angka selisih yang dipakai di narasi di atas adalah besaran turunan; operan dan rumusnya dirinci di bagian 11.
 
 ## 6. Jawaban #7 — Grid provinsi × periode, kelengkapan, dan satuan
 
@@ -174,6 +174,8 @@ Ringkasan: [`tabel/ringkasan_kategori_anomali.csv`](tabel/ringkasan_kategori_ano
 
 **Patahan `var1353`.** Dari 33 provinsi yang berpasangan, **26 provinsi turun (78,8%)**, 5 naik, dan 2 tetap; median perubahan **−11 per 1.000**, rata-rata **−14,09**. Pola searah hampir serentak ini adalah kandidat patahan/revisi seri atau perubahan metode/definisi. WDI juga turun dari 44,62 (2012) menjadi 32,79 (2017), sehingga tren nyata belum dapat dikesampingkan. Nilai tidak diubah; keputusan dicatat sebagai **K-008**.
 
+**Batas dua titik dan patahan wilayah.** Seri utama hanya memiliki dua periode observasi (2012 dan 2017), sehingga uji patahan seri tidak dapat memisahkan secara tegas perubahan metode dari tren nyata. Klasifikasi `var1353` di atas tetap **kandidat** (K-008, ditegaskan K-021). Selain itu, terdapat perubahan cakupan wilayah antara periode 2012 dan 2017. Data Kalimantan Utara (kode 6500) belum tercatat pada 2012 dan baru muncul pada 2017, sedangkan Kalimantan Timur (kode 6400) tercatat pada kedua periode. Kondisi ini perlu diperhatikan saat membandingkan perubahan nilai antarperiode karena cakupan wilayahnya tidak sepenuhnya sebanding. Temuan ini dicatat sebagai potensi patahan wilayah (K-021), bukan sebagai koreksi nilai atau missing.
+
 **Bukan patahan `var1394`.** Arah perubahan campuran: 21 provinsi turun (63,6%), 12 naik, median hanya **−1,2**. Tidak ada indikasi lonjakan serentak. Anomali Papua dan Papua Barat dikategorikan outlier asli karena nilai ekstremnya konsisten dengan posisi kedua provinsi yang memang rendah, bukan kesalahan input.
 
 **Galat input.** Tidak ditemukan nilai negatif, nilai di luar domain satuan, kode wilayah ganda, atau nilai yang melanggar metadata. `var1353` maksimum 104 per 1.000 masih mungkin secara substantif. Karena tidak ada bukti galat input, **tidak ada nilai yang dikoreksi**. Keputusan dicatat sebagai **K-007**.
@@ -184,6 +186,8 @@ Ringkasan: [`tabel/ringkasan_kategori_anomali.csv`](tabel/ringkasan_kategori_ano
 - Angka sama dari dua snapshot/representasi **bukan duplikat yang salah**; angka berbeda adalah **revisi**, bukan dirata-rata.
 - CSV dan JSON BPS dari snapshot 2026-10-20 dibandingkan per `(wilayah, tahun)`: **69 nilai per seri, 69 sama, 0 berbeda, 0 hanya di satu sisi**. Keduanya identik, sehingga CSV dipakai sebagai kanonik dan JSON sebagai pemeriksa. Bukti: [`tabel/deduplikasi_csv_json.csv`](tabel/deduplikasi_csv_json.csv).
 - Tidak ada snapshot kedua untuk seri yang sama pada paket ini, sehingga belum ada revisi yang dapat diamati. Snapshot BPS 2026-10-17 berisi seri SDG 4 (pendidikan) dan tidak dipakai untuk kasus ini.
+
+**Contoh dampak aturan deduplikasi (K-022).** Untuk `var1353`, Kalimantan Barat (6100) tahun 2012, CSV memuat **104** dan JSON juga memuat **104** — satu observasi yang sama. Jika JSON ikut dimuat sebagai observasi kedua, baris seri utama naik dari **138 menjadi 276**, total Silver dari **235 menjadi 373**, dan setiap pasangan wilayah–tahun memiliki dua baris Silver kandidat. Karena kunci Silver memuat `_berkas_raw`, kedua baris tidak melanggar kunci primer: duplikasinya bersifat **analitik**, bukan pelanggaran skema. Karena itu CSV dipertahankan sebagai kanonik dan JSON sebagai pemeriksa; dampak baris sesuai K-006/K-022 adalah **0**.
 
 ## 8. Keputusan yang tercatat
 
@@ -227,3 +231,51 @@ Metrik yang tersimpan di `results/124450127/metrics.json`:
 - Nilai 2025 WDI kosong dan tidak diisi.
 - Grid 38 provinsi tidak sepenuhnya didukung data 2012/2017; analisis panel harus membatasi diri pada provinsi yang benar-benar ada pada kedua tahun atau melaporkan ketidakseimbangan secara eksplisit.
 - Langkah berikutnya: verifikasi patahan `var1353` ke rilis/metadata BPS, lengkapi pembanding nasional pada Gold, dan dokumentasikan aturan missing/patahan di data dictionary serta skema validasi.
+
+## 11. Rujukan angka
+
+Setiap angka di laporan ini ditautkan ke tabel hasil yang sudah di-commit atau ke keputusan di `log-keputusan.csv`. Angka turunan disertai operan dan rumusnya. Semua tabel berikut berada di `reports/tabel/`, kecuali dinyatakan lain.
+
+| Angka di laporan | Nilai | Sumber tabel / hasil | Log |
+|---|---|---|---|
+| Baris Silver | 235 | `results/124450127/metrics.json`; `reports/validasi.md`; `data/silver/silver.parquet` | — |
+| Baris seri utama | 138 | `statistik_seri.csv` (67+67 provinsi) + 4 baris nasional; `silver.parquet` | — |
+| Seri / wilayah / berkas sumber | 5 / 35 / 5 | `reports/validasi.md`; `silver.parquet` | — |
+| Baris per sumber (BPS 2 berkas, WHO MDG, WHO SDGFPALL, WDI) | 69 / 69 / 26 / 6 / 65 | `silver.parquet` dikelompokkan per `_berkas_raw` | K-013, K-014, K-018 |
+| Tahun observasi utama | 2012, 2017 | `statistik_seri.csv`; `grid_panel.csv`; `data/raw/bps/2026-10-20/` | K-004 |
+| Provinsi teramati 2012 / 2017 | 33 / 34 | `statistik_seri.csv` kolom `n`; `kelengkapan_grid.csv` | K-005, K-010 |
+| Mean `var1394` 2012 / 2017 | 54,32 / 53,96 | `statistik_seri.csv`, baris `var1394` | — |
+| Median / IQR `var1394` 2012 / 2017 | 55,10 / 14,00; 56,05 / 13,68 | `statistik_seri.csv`, baris `var1394` | — |
+| Min–maks `var1394` 2012 / 2017 | 19,10–66,40; 35,90–69,40 | `statistik_seri.csv`, kolom `min`/`max` | — |
+| Mean `var1353` 2012 / 2017 | 56,06 / 41,71 | `statistik_seri.csv`, baris `var1353` | K-003 |
+| Median / IQR `var1353` 2012 / 2017 | 53,00 / 29,00; 44,50 / 21,00 | `statistik_seri.csv`, baris `var1353` | — |
+| Min–maks `var1353` 2012 / 2017 | 20,00–104,00; 15,00–83,00 | `statistik_seri.csv`, kolom `min`/`max` | — |
+| Nilai nasional `var1394` 2012 / 2017 | 57,9 / 57,2 | `statistik_nasional.csv`; `grid_nasional.csv` | — |
+| Nilai nasional `var1353` 2012 / 2017 | 48 / 36 | `statistik_nasional.csv`; `grid_nasional.csv` | K-003 |
+| Satuan `var1353` | per 1.000 perempuan 15–19 | `log-keputusan.csv` K-003; `silver.parquet` kolom `satuan` | K-003 |
+| Jumlah calon anomali | 7 (3 `var1394`, 4 `var1353`) | `anomali.csv`; `ringkasan_kategori_anomali.csv`; `results/124450127/metrics.json` | K-007 |
+| Kategori anomali | 4 outlier asli, 3 patahan, 0 galat input | `ringkasan_kategori_anomali.csv` | K-007, K-008, K-021 |
+| z-score anomali | 2,23; 2,09; −2,54; 2,69; −3,42; −2,05; 4,08 | `anomali.csv` kolom `z_skor` / `z_delta` | — |
+| Pagar IQR 2012 `var1394` / 2017 `var1353` | [27,00; 83,00] / [−1,75; 82,25] | `anomali.csv` kolom `batas_bawah` / `batas_atas` | — |
+| Penurunan serentak `var1353` | 26/33 (78,8%), median −11, mean −14,09 | `ringkasan_patahan.csv`, baris `var1353` | K-008 |
+| Arah perubahan `var1394` | 21 turun, 12 naik, median −1,2 | `ringkasan_patahan.csv`, baris `var1394` | — |
+| Catatan cakupan wilayah Kaltim dan Kaltara | Kaltim (6400): 54,1/59,3 dan 50/53; Kaltara (6500): belum tercatat pada 2012, 46,9 dan 33 pada 2017 | `statistik_provinsi.csv`; `silver.parquet` | K-021 |
+| Total sel grid | 456 = 38 × 6 × 2 | `grid_panel.csv` (456 baris); `kelengkapan_grid.csv` | K-004 |
+| Sel terisi | 134 (29,39%) | `kelengkapan_grid.csv` kolom `n_terisi`; `results/124450127/metrics.json` | — |
+| Sel kosong | 322 | `grid_panel.csv`; `results/124450127/metrics.json` | K-004, K-005 |
+| `tidak_terbit` | 304 = 38 × 4 tahun × 2 seri | `kelengkapan_grid.csv` kolom `n_tidak_terbit` | K-004 |
+| `belum_ada` + `belum_tercakup` | 16 + 2 = 18 | `kelengkapan_grid.csv` kolom `n_belum_ada` / `n_belum_tercakup` | K-005 |
+| Missing sejati | 0 | `kelengkapan_grid.csv` kolom `n_missing`; `results/124450127/metrics.json` | K-004, K-005 |
+| Persen terisi per seri | 2012: 33/38 = 86,84%; 2017: 34/38 = 89,47% | `kelengkapan_grid.csv` | — |
+| Kelengkapan tahun survei | 67/76 = 88,16% per seri | `kelengkapan_grid.csv` (33+34 terisi dari 2×38) | — |
+| Perbandingan CSV vs JSON | 69/69 sama, 0 beda, 0 hanya satu sisi | `deduplikasi_csv_json.csv` | K-006, K-022 |
+| Contoh dedup Kalbar 2012 `var1353` | 104 (CSV) = 104 (JSON) | `data/raw/bps/2026-10-20/sdg3_3_7_2_v1353.csv` dan `json/sdg3_3_7_2_v1353.json` | K-022 |
+| Dampak bila JSON ikut dimuat | seri utama 138→276; Silver 235→373 | jumlah baris `baca_bps()` + `baca_bps_json()` di `src/silver/profil.py` | K-022 |
+| WDI `SP.ADO.TFRT` 2012 / 2017 | 44,616 / 32,792 | `ketersediaan_pembanding_panjang.csv`; `silver.parquet` | K-009 |
+| WHO `SDGFPALL` 2012 / 2017 | 79,0 / 77,0 | `ketersediaan_pembanding_panjang.csv`; `silver.parquet` | K-009 |
+| WHO `MDG_0000000003` Y15T19 2016 | 36,109833 | `ketersediaan_pembanding_panjang.csv`; `silver.parquet` | K-009 |
+| Selisih `var1394` − `SDGFPALL` | −21,1 pp = 57,9 − 79,0; −19,8 pp = 57,2 − 77,0 | `statistik_nasional.csv` + `ketersediaan_pembanding_panjang.csv` | K-020 |
+| Selisih `var1353` − `SP.ADO.TFRT` | +3,38 = 48,0 − 44,616; +3,21 = 36,0 − 32,792 | `statistik_nasional.csv` + `ketersediaan_pembanding_panjang.csv` | K-020 |
+| Berkas manifest / cocok SHA256 / `data_hash` | 13 / 13 / `5b38cf44…` | `data/raw/MANIFEST.csv`; `python -c "from src.common.hasil import data_hash; print(data_hash())"` | — |
+
+Bukti metrics anggota lain dan status sinkronisasi `data_hash` tercantum di `reports/individu/124450127.md` bagian 4.1; saya tidak mengubah berkas `results/<nim>/` milik anggota lain.
