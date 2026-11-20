@@ -1,12 +1,10 @@
 {
   "metrik": {
-    "baris_diperiksa": 374,
-    "nilai_kosong": 1,
-    "duplikat_logis": 138,
-    "outlier_iqr": 5,
-    "patahan_tahun": 287
+    "seri_silver": 5,
+    "rincian_dienkode": 3,
+    "baris_silver": 235
   },
   "seed": 0,
-  "data_hash": "65d843138bf94478bde504634556ba0ca67a95e7f6e9810f99c45a2591fd6c63",
-  "perangkat": "Windows AMD64 Python 3.13.7"
+  "data_hash": "5b38cf44085ab091ed026ebe94710c90a1c1f4ff25f2f039d9ee77e32306af4b",
+  "perangkat": "Windows AMD64 Python 3.14.6"
 }
