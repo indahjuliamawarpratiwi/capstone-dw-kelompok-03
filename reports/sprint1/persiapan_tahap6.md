@@ -18,21 +18,25 @@
 - Sumber baris: hanya observasi nasional (BPS 9999; WHO M49 360; WDI country ID) dari ekstraksi terverifikasi; tidak mengisi nilai yang tidak tersedia.
 
 ## 3. Daftar pasangan rekonsiliasi & catatan keterbandingan
+Sumber rincian di bawah adalah nilai `rincian` di `data/gold/nasional_periode_seri.parquet` (dari hasil ekstraksi), bukan nama ringkas di laporan.
+
 ### Pasangan 1 (SDG 3.7.2, kelahiran remaja)
-- **Anggota:** `var1353` (BPS, Indonesia 9999) vs `MDG_0000000003` (WHO GHO, rincian umur sesuai) vs `SP.ADO.TFRT` (WDI).
-- **Definisi & populasi:** var1353 = ASFR perempuan 15–19 (SDKI). WHO MDG_0000000003 = adolescent birth rate, female, tersedia Y10T14 & **Y15T19**. WDI SP.ADO.TFRT = births per 1,000 women ages 15–19.
-- **Kelompok umur:** rincian WHO yang sesuai untuk perbandingan dengan var1353/WDI adalah **Y15T19** (bukan Y10T14). Ketiganya menarget usia 15–19 → syarat kesamaan kelompok umur **terpenuhi secara definisi** pada rincian Y15T19.
-- **Satuan:** WDI & WHO Y15T19 per 1.000 perempuan 15–19; var1353 di CSV kosong satuannya (metadata implisit per 1.000) → **harus ditetapkan & dicatat** sebelum hitung selisih.
-- **Periode beririsan (aktual, snapshot):** var1353 {2012,2017} ∩ MDG Y15T19 {…,2013,2015,2016} ∩ WDI {1960–2024} = **∅ (tidak ada tahun irisan 3-seri)**. Irisan berpasangan: var1353∩WDI = {2012,2017}; var1353∩MDG Y15T19 = ∅; MDG Y15T19∩WDI banyak (2001–2016 kecuali gap).
-- **Status keterbandingan:** **Tidak dapat dibandingkan langsung (3-seri, tahun sama)** karena tidak ada periode irisan bersama dan sumber/metode/vintage berbeda (SDKI vs estimasi WHO/UN WPP). Dapat disajikan sebagai **pembanding kontekstual** berpasangan/deret waktu dengan selisih dijelaskan (bukan dihapus) — perhitungan selisih hanya bila definisi/umur/populasi/satuan terbukti sebanding dan periode sama; **selisih 3-seri ditunda/tidak dihitung**.
+- **Anggota & rincian yang benar-benar dipakai:** `var1353` (BPS, `wilayah_id=9999`, `turvar='Tidak ada'`; umur 15–19 berasal dari judul) vs `MDG_0000000003` (WHO GHO, **`DIM_AGE=Y15T19`**, `DIM_SEX=FEMALE`; `Y10T14` tidak dipakai) vs `SP.ADO.TFRT` (WDI, `country=ID/IDN`; `age=15-19` dari nama indikator).
+- **Definisi & populasi:** var1353 = angka kelahiran remaja perempuan 15–19 (SDKI). WHO = *adolescent birth rate*, perempuan 15–19 dari survei/registrasi sipil. WDI = *births per 1,000 women ages 15-19* dari estimasi UN World Population Prospects.
+- **Kelompok umur:** ketiganya **15–19 tahun** (WHO memakai rincian `Y15T19`) → syarat kesamaan kelompok umur **terpenuhi sebelum selisih dihitung**.
+- **Satuan:** ketiganya per 1.000 perempuan 15–19; satuan CSV var1353 kosong dan sudah ditetapkan dari definisi WHO/nama WDI (K-007), dicatat agar tidak dianggap persen.
+- **Status perkawinan:** tidak ada syarat menikah/bersatu di ketiga definisi; populasi adalah perempuan 15–19, bukan hanya yang menikah.
+- **Periode beririsan (aktual, snapshot):** var1353 {2012,2017} ∩ MDG `Y15T19` {2001–2011,2013,2015,2016} ∩ WDI {1960–2024} = **∅ (tidak ada tahun irisan 3-seri)**. Irisan berpasangan: var1353∩WDI = {2012,2017}; var1353∩MDG `Y15T19` = ∅; MDG `Y15T19`∩WDI = 2001–2011, 2013, 2015, 2016.
+- **Alasan keterbandingan:** umur dan satuan sama, tetapi sumber/metode/vintage berbeda (SDKI vs WHO vs WPP) dan tidak ada tahun bersama ketiganya. **Status: pembanding kontekstual; selisih 3-seri tidak dihitung.** Sprint 2 memakai `Y15T19` dan menandai tahun terdekat bila perlu; selisih dijelaskan, bukan dihapus.
 
 ### Pasangan 2 (SDG 3.7.1, KB modern)
-- **Anggota:** `var1394` (BPS, Indonesia 9999) vs `SDGFPALL` (WHO GHO).
-- **Definisi:** var1394 = proporsi perempuan usia reproduksi (15–49) atau pasangannya dengan kebutuhan KB terpenuhi metode modern (SDKI). SDGFPALL = family planning satisfied with modern methods (WHO/UN).
-- **Kelompok umur & status perkawinan/populasi:** keduanya **15–49 tahun, female**; konsep “kebutuhan terpenuhi metode modern (demand satisfied, modern)” selaras, namun denominasi/populasi rujukan dapat berbeda (mis. perempuan menikah/bersatu vs all women in need, tergantung estimasi) → **perlu verifikasi definisi operasional & status perkawinan** di metadata sebelum selisih numerik.
+- **Anggota & rincian yang benar-benar dipakai:** `var1394` (BPS, `wilayah_id=9999`, `turvar='Tidak ada'`; 15–49 dan “atau pasangannya” dari judul) vs `SDGFPALL` (WHO GHO, **`DIM_AGE=Y15T49`** konstan di berkas, `DIM_SEX=FEMALE`, kolom `RATE_PER_100_N`).
+- **Definisi:** var1394 = proporsi perempuan usia reproduksi (15–49) atau pasangannya yang memiliki kebutuhan KB dan memakai metode modern (SDKI). SDGFPALL = *demand for family planning satisfied with modern methods*; numerator juga memasukkan pasangan yang memakai metode modern.
+- **Kelompok umur:** keduanya **15–49 tahun, female** (WHO lewat `DIM_AGE=Y15T49`).
+- **Status perkawinan/populasi:** kedua definisi **tidak membatasi hanya perempuan menikah/bersatu**; keduanya menyebut pasangan pada numerator. Penyebut WHO = seluruh permintaan KB (pemakai metode apa pun + kebutuhan tak terpenuhi), sedangkan judul var1394 tidak menyebut penyebutnya. *Limitations* WHO mencatat perbedaan base populasi (termasuk status perkawinan) antarsurvei → harus diverifikasi sebelum menyatakan identik.
 - **Satuan:** persen (keduanya).
 - **Periode beririsan (aktual):** var1394 {2012,2017} ∩ SDGFPALL {2002,2007,2012,2015,2016,2017} = **{2012, 2017}** (2 periode).
-- **Status keterbandingan:** **Berpotensi sebanding secara indikator & periode** (2012,2017) namun **pembanding kontekstual hingga verifikasi populasi/definisi operasional** selesai; selisih dapat dihitung di Sprint 2 dengan anotasi metodologi (nilai contoh: 2012 57.9 vs 79.0; 2017 57.2 vs 77.0 — selisih besar, indikasi perbedaan definisi/denominasi, bukan untuk dihapus).
+- **Alasan keterbandingan & status:** umur, satuan, dan konsep *modern demand satisfied* sama, sehingga **berpotensi sebanding bersyarat**; pembeda ada pada penyebut/base populasi yang belum terverifikasi. Nilai 2012 57.9 vs 79.0 dan 2017 57.2 vs 77.0 menunjukkan selisih besar yang harus **dijelaskan, bukan dihapus**. Sprint 2 menghitung selisih dengan anotasi metodologi setelah verifikasi.
 
 ## 4. Artefak persiapan & kebutuhan belum tersedia
 - Dokumen: `reports/sprint1/persiapan_tahap6.md` (ini), draf tahapan & perbandingan: `reports/sprint1/tahap5_sql_dan_json.md`.
