@@ -1,0 +1,868 @@
+{
+ "sumber": "WebAPI BPS",
+ "domain": "0000",
+ "skrip": "scrapping-bps-data.py",
+ "tabel": {
+  "sdg1_1_4_1_v2016": {
+   "jenis": "dinamis",
+   "var": 2016,
+   "judul": "Proporsi rumah tangga dengan akses terhadap pelayanan dasar menurut provinsi",
+   "satuan": "Persen",
+   "last_update": [
+    "2024-05-22 07:29:45"
+   ],
+   "tahun": [
+    "2019",
+    "2020",
+    "2021",
+    "2022",
+    "2023"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 525,
+   "sha256_json": "acba9b5b1f38380ed9863e469f6561d93517e9f5b1d920217f2c39df75f5d284",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg2_2_3_1_a_v1344": {
+   "jenis": "dinamis",
+   "var": 1344,
+   "judul": "Nilai Tambah Pertanian Dibagi Jumlah Tenaga Kerja Di Sektor Pertanian",
+   "satuan": "Rupiah/Tenaga Kerja",
+   "last_update": [
+    "2024-05-27 10:34:50"
+   ],
+   "tahun": [
+    "2015",
+    "2016",
+    "2017",
+    "2018",
+    "2019",
+    "2020",
+    "2021",
+    "2022",
+    "2023"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 315,
+   "sha256_json": "d8034830bd3de50fa76b40f4c7d89ff1fc1a4974b24cdb673cd6638bdc41be33",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg2_2_1_1_v1473": {
+   "jenis": "dinamis",
+   "var": 1473,
+   "judul": "Prevalensi Ketidakcukupan Konsumsi Pangan",
+   "satuan": "Persen",
+   "last_update": [
+    "2026-01-20 09:50:09"
+   ],
+   "tahun": [
+    "2017",
+    "2018",
+    "2019",
+    "2020",
+    "2021",
+    "2022",
+    "2023",
+    "2024",
+    "2025"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 323,
+   "sha256_json": "541e092ddd477ac63087a2bf687866ad198f638f342aab78de44b205134547e7",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg2_2_1_2_v1474": {
+   "jenis": "dinamis",
+   "var": 1474,
+   "judul": "Prevalensi Penduduk Dengan Kerawanan Pangan Sedang Atau Berat, Berdasarkan Pada Skala Pengalaman Kerawanan Pangan",
+   "satuan": "Persen",
+   "last_update": [
+    "2026-08-28 08:48:28"
+   ],
+   "tahun": [
+    "2017",
+    "2018",
+    "2019",
+    "2020",
+    "2021",
+    "2022",
+    "2023",
+    "2024",
+    "2025"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 323,
+   "sha256_json": "6f82d02015acd806bba1cfd4a135afe5a58e9fb681ea3e2761373edbe94b55bf",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg3_3_7_2_v1353": {
+   "jenis": "dinamis",
+   "var": 1353,
+   "judul": "Angka Kelahiran Pada Perempuan Usia 15-19 Tahun Menurut Provinsi ",
+   "satuan": "",
+   "last_update": [
+    "2021-11-08 08:49:23"
+   ],
+   "tahun": [
+    "2012",
+    "2017"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 69,
+   "sha256_json": "230ce163135e9ea9e078649b2812136780e9e2db9d4c110dc3e21f2fe50faf5a",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg3_3_2_1_v1373": {
+   "jenis": "dinamis",
+   "var": 1373,
+   "judul": "Angka Kematian Balita Per 1000 Kelahiran Hidup Menurut Provinsi",
+   "satuan": "",
+   "last_update": [
+    "2019-10-04 00:00:00"
+   ],
+   "tahun": [
+    "2012",
+    "2017"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 35,
+   "sha256_json": "7512780e34bc137cce49db6bdd213765ad52cb3bce3a56dbd0778bf57ffcd9bb",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg3_3_3_3_v1393": {
+   "jenis": "dinamis",
+   "var": 1393,
+   "judul": "Kejadian Malaria Per 1000 Orang",
+   "satuan": "",
+   "last_update": [
+    "2024-05-26 10:11:08"
+   ],
+   "tahun": [
+    "2010",
+    "2011",
+    "2012",
+    "2013",
+    "2014",
+    "2015",
+    "2016",
+    "2017",
+    "2018",
+    "2019",
+    "2020",
+    "2021"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 416,
+   "sha256_json": "6b358d9cbb03451834a181aa411a3eac4fc574cbe714d1dcc4b0ee74921dc936",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg3_3_7_1_v1394": {
+   "jenis": "dinamis",
+   "var": 1394,
+   "judul": "Proporsi Perempuan Usia Reproduksi (15-49 tahun) atau Pasangannya yang Memiliki Kebutuhan Keluarga Berencana dan Menggunakan Alat Kontrasepsi Metode Modern",
+   "satuan": "Persen",
+   "last_update": [
+    "2019-10-04 00:00:00"
+   ],
+   "tahun": [
+    "2012",
+    "2017"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 69,
+   "sha256_json": "6ae359c6df0dfd6ce210233dc28ada9060be0996f855288d6c4fbfee88b55c74",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg3_3_8_1_a_v1402": {
+   "jenis": "dinamis",
+   "var": 1402,
+   "judul": "Persentase Unmet Need Pelayanan Kesehatan Menurut Provinsi",
+   "satuan": "Persen",
+   "last_update": [
+    "2025-12-12 14:07:59"
+   ],
+   "tahun": [
+    "2015",
+    "2016",
+    "2017",
+    "2018",
+    "2019",
+    "2020",
+    "2021",
+    "2022",
+    "2023",
+    "2024",
+    "2025"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 393,
+   "sha256_json": "28ffd7f28e35a54da609618ee3fd164c20cd39e248ab69aa2cda94c90e50b15d",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg3_3_a_1_v1435": {
+   "jenis": "dinamis",
+   "var": 1435,
+   "judul": "Persentase Penduduk Berumur 15 Tahun ke Atas yang Merokok Tembakau selama Sebulan Terakhir Menurut Provinsi",
+   "satuan": "Persen",
+   "last_update": [
+    "2025-12-12 14:16:50"
+   ],
+   "tahun": [
+    "2015",
+    "2016",
+    "2017",
+    "2018",
+    "2019",
+    "2020",
+    "2021",
+    "2022",
+    "2023",
+    "2024",
+    "2025"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 393,
+   "sha256_json": "96ea045ffa45717d4983f731f624fd2c2e2e9e27c8528de649d2c4dcc95ee914",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg3_3_c_1_v1477": {
+   "jenis": "dinamis",
+   "var": 1477,
+   "judul": "Kepadatan Dan Distribusi Tenaga Kesehatan",
+   "satuan": "",
+   "last_update": [
+    "2021-11-08 09:53:25"
+   ],
+   "tahun": [
+    "2016",
+    "2017",
+    "2018"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 926,
+   "sha256_json": "37486df9e57ea83efdadd057f9f6672252cc26e516e147ca5b5154e4884e7f7c",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg3_3_4_1_b_v1480": {
+   "jenis": "dinamis",
+   "var": 1480,
+   "judul": "Prevalensi Tekanan Darah Tinggi Menurut Provinsi",
+   "satuan": "",
+   "last_update": [
+    "2021-11-08 09:56:32"
+   ],
+   "tahun": [
+    "2007",
+    "2013",
+    "2016",
+    "2018"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 104,
+   "sha256_json": "680084abcc4f9ba5f8468e366f3fe7e6b8c1eb1bae3f7d90ef48e34ca9017009",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg3_3_1_2_v1541": {
+   "jenis": "dinamis",
+   "var": 1541,
+   "judul": "Persentase Perempuan Pernah Kawin Umur 15-49 Tahun Yang Proses Kelahiran Terakhirnya Di Fasilitas Kesehatan (40% Bawah) Menurut Provinsi",
+   "satuan": "Persen",
+   "last_update": [
+    "2019-10-04 00:00:00"
+   ],
+   "tahun": [
+    "2015",
+    "2016",
+    "2017",
+    "2018",
+    "2019"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 175,
+   "sha256_json": "64e49e246c377ee2d991f58c1dc7b09901330395260937fb35617e9c50883849",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg3_3_2_1_v1584": {
+   "jenis": "dinamis",
+   "var": 1584,
+   "judul": "Angka Kematian Bayi (AKB) Per 1000 Kelahiran Hidup Menurut Provinsi",
+   "satuan": "",
+   "last_update": [
+    "2019-10-06 00:00:00"
+   ],
+   "tahun": [
+    "2012",
+    "2017"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 35,
+   "sha256_json": "55caba4491921f976ea8ce66b8852c2bba49a37682b4f6286a0eb7dcfca8647e",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg3_3_8_2_a_v2279": {
+   "jenis": "dinamis",
+   "var": 2279,
+   "judul": "Persentase Penduduk yang Memiliki Jaminan Kesehatan Nasional (JKN) Menurut Provinsi",
+   "satuan": "Persen",
+   "last_update": [
+    "2025-12-16 10:47:03"
+   ],
+   "tahun": [
+    "2022",
+    "2023",
+    "2024",
+    "2025"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 152,
+   "sha256_json": "11f300d467f595a6b5e2250a84ff31452b4036828ac8e47f3e1b4bfe0cb7883f",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg5_5_b_1_v1221": {
+   "jenis": "dinamis",
+   "var": 1221,
+   "judul": "5.b.1* Proporsi Individu yang Menguasai/Memiliki Telepon Genggam Menurut Provinsi",
+   "satuan": "Persen",
+   "last_update": [
+    "2026-07-06 14:55:49"
+   ],
+   "tahun": [
+    "2015",
+    "2016",
+    "2017",
+    "2018",
+    "2019",
+    "2020",
+    "2021",
+    "2022",
+    "2023",
+    "2024",
+    "2025"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 393,
+   "sha256_json": "d8597519b86a12d5955b0339db523e03ad125c89e7b393b05060bb691df84e34",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg5_5_3_1_v1360": {
+   "jenis": "dinamis",
+   "var": 1360,
+   "judul": "Proporsi Perempuan Umur 20-24 Tahun Yang Berstatus Kawin Atau Berstatus Hidup Bersama Sebelum Umur 18 Tahun Menurut Provinsi",
+   "satuan": "Persen",
+   "last_update": [
+    "2026-08-28 02:25:19"
+   ],
+   "tahun": [
+    "2015",
+    "2016",
+    "2017",
+    "2018",
+    "2019",
+    "2020",
+    "2021",
+    "2022",
+    "2023",
+    "2024",
+    "2025"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 393,
+   "sha256_json": "5d0a4943de00ff7278b7dc7fababda580e5b350e7301397fb2018fe32b6cf9ba",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg5_5_5_2_v2003": {
+   "jenis": "dinamis",
+   "var": 2003,
+   "judul": "Proporsi perempuan yang berada di posisi managerial menurut provinsi",
+   "satuan": "",
+   "last_update": [
+    "2026-07-06 15:41:30"
+   ],
+   "tahun": [
+    "2015",
+    "2016",
+    "2017",
+    "2018",
+    "2019",
+    "2020",
+    "2021",
+    "2022",
+    "2023",
+    "2024",
+    "2025"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 391,
+   "sha256_json": "5ecb345dd398f24777fd9aeee46246db328cad89ae26f29555a4efaf816b8afb",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg9_9_2_1_v1214": {
+   "jenis": "dinamis",
+   "var": 1214,
+   "judul": "Proporsi Nilai Tambah Sektor Industri Manufaktur Terhadap PDB",
+   "satuan": "",
+   "last_update": [
+    "2024-05-15 09:21:28"
+   ],
+   "tahun": [
+    "2010",
+    "2011",
+    "2012",
+    "2013",
+    "2014",
+    "2015",
+    "2016",
+    "2017",
+    "2018",
+    "2019",
+    "2020",
+    "2021",
+    "2022",
+    "2023"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 494,
+   "sha256_json": "7ae7ec4aff93fb9e211efde623eb5010c3f4c655c7c187f0f6b59bd6b8af5c26",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg9_9_1_2_v2753": {
+   "jenis": "dinamis",
+   "var": 2753,
+   "judul": "9.1.2* Jumlah Bongkar Muat Barang Moda Transportasi Kapal",
+   "satuan": "KG",
+   "last_update": [
+    "2026-06-03 14:03:07"
+   ],
+   "tahun": [
+    "2021",
+    "2022",
+    "2023",
+    "2024",
+    "2025"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 370,
+   "sha256_json": "e043c82edb22270cb8b802fca7cab80f3a0d62f6d32307020b6fd724f20258e5",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg9_9_1_2_v2754": {
+   "jenis": "dinamis",
+   "var": 2754,
+   "judul": "9.1.2*. Jumlah Bongkar Muat Barang Moda Transportasi Pesawat Terbang",
+   "satuan": "KG",
+   "last_update": [
+    "2026-06-03 14:04:11"
+   ],
+   "tahun": [
+    "2021",
+    "2022",
+    "2023",
+    "2024",
+    "2025"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 390,
+   "sha256_json": "8701670cc93f2694bdf983ab34a05ad32c81379077f2430c32ce0eb58a1e9764",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg9_9_2_2_v2755": {
+   "jenis": "dinamis",
+   "var": 2755,
+   "judul": "9.2.2* Proporsi Tenaga Kerja Pada Sektor Industri Manufaktur Menurut Provinsi",
+   "satuan": "Persen",
+   "last_update": [
+    "2026-06-03 14:05:07"
+   ],
+   "tahun": [
+    "2018",
+    "2019",
+    "2020",
+    "2021",
+    "2022",
+    "2023",
+    "2024",
+    "2025"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 288,
+   "sha256_json": "44a9d3d767406853932ac1c69afd2b2fefdf08e81f9d5a94117779576ea4d7fe",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg10_10_1_1_f_v192": {
+   "jenis": "dinamis",
+   "var": 192,
+   "judul": "Persentase Penduduk Miskin (P0) Menurut Provinsi dan Daerah",
+   "satuan": "Persen",
+   "last_update": [
+    "2026-08-05 12:36:39"
+   ],
+   "tahun": [
+    "2007",
+    "2008",
+    "2009",
+    "2010",
+    "2011",
+    "2012",
+    "2013",
+    "2014",
+    "2015",
+    "2016",
+    "2017",
+    "2018",
+    "2019",
+    "2020",
+    "2021",
+    "2022",
+    "2023",
+    "2024",
+    "2025",
+    "2026"
+   ],
+   "periode": [
+    "Semester 1 (Maret)",
+    "Semester 2 (September)",
+    "Tahunan"
+   ],
+   "baris": 3461,
+   "sha256_json": "8d3c028b5e6b246865af1c635fd4e835e5cd12aca7a9387fc2b53e2270771fc4",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg10_10_2_1_v2011": {
+   "jenis": "dinamis",
+   "var": 2011,
+   "judul": "Proporsi penduduk yang hidup di bawah 50 persen dari median pendapatan, menurut provinsi",
+   "satuan": "",
+   "last_update": [
+    "2024-05-15 10:19:47"
+   ],
+   "tahun": [
+    "2018",
+    "2019",
+    "2020",
+    "2021",
+    "2022",
+    "2023"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 205,
+   "sha256_json": "6ce652c5f1a982a33d89b625211b9610d718da9afe6258012821f185ed24da9c",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg10_10_1_1_d_v2190": {
+   "jenis": "dinamis",
+   "var": 2190,
+   "judul": "Jumlah Desa Mandiri Menurut Provinsi",
+   "satuan": "Desa",
+   "last_update": [
+    "2019-12-01 08:22:44"
+   ],
+   "tahun": [
+    "2019",
+    "2020",
+    "2021"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 102,
+   "sha256_json": "88b48cc13a4046cd4cc2a027e923dfe95fa31fe13a34b5c69d552b4592cd8a70",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg10_10_1_1_c_v2191": {
+   "jenis": "dinamis",
+   "var": 2191,
+   "judul": "Jumlah Desa Tertinggal menurut Provinsi",
+   "satuan": "Desa",
+   "last_update": [
+    "2019-12-01 08:22:44"
+   ],
+   "tahun": [
+    "2019",
+    "2020",
+    "2021"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 306,
+   "sha256_json": "02fe55d612d4e1ea058d3e33caa250cc2e9dd400f7ffc52d41000f3cd4b8bcdf",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg11_11_1_1_a_v1241": {
+   "jenis": "dinamis",
+   "var": 1241,
+   "judul": "11.1.1.(a) Persentase Rumah Tangga yang Memiliki Akses Terhadap Hunian Yang Layak Menurut Provinsi",
+   "satuan": "Persen",
+   "last_update": [
+    "2026-04-15 03:08:40"
+   ],
+   "tahun": [
+    "2015",
+    "2016",
+    "2017",
+    "2018",
+    "2019",
+    "2020",
+    "2021",
+    "2022",
+    "2023",
+    "2024",
+    "2025"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 393,
+   "sha256_json": "e7456ea606505e1986ba048f44a931d5c212234581b8b116ae9980214e78d23b",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg11_11_2_1_a_v2012": {
+   "jenis": "dinamis",
+   "var": 2012,
+   "judul": "Persentase rumah tangga yang memiliki akses nyaman (jarak 0.5 km) ke transportasi umum menurut provinsi",
+   "satuan": "",
+   "last_update": [
+    "2021-06-23 11:32:59"
+   ],
+   "tahun": [
+    "2017",
+    "2020"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 70,
+   "sha256_json": "6c5fe138931395fcf158bddd477898225bc691f945baf0301a8c35259b2563b8",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg11_11_2_1_b_v2013": {
+   "jenis": "dinamis",
+   "var": 2013,
+   "judul": "Persentase penduduk berumur 10 tahun ke atas yang menggunakan kendaraan bermotor umum dengan rute tertentu menurut provinsi",
+   "satuan": "",
+   "last_update": [
+    "2021-06-23 11:32:04"
+   ],
+   "tahun": [
+    "2017",
+    "2020"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 70,
+   "sha256_json": "e6553c5bb49e8b2e3d7032186180253bf8550e11b82b1be2f93561d8d92b4ba2",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg16_16_1_3_a_v1311": {
+   "jenis": "dinamis",
+   "var": 1311,
+   "judul": "16.1.3 (a) Proporsi Penduduk Yang Menjadi Korban Kejahatan Kekerasan Dalam 12 Bulan Terakhir Menurut Provinsi",
+   "satuan": "Persen",
+   "last_update": [
+    "2026-04-30 01:52:27"
+   ],
+   "tahun": [
+    "2015",
+    "2016",
+    "2017",
+    "2018",
+    "2019",
+    "2020",
+    "2021",
+    "2022",
+    "2023",
+    "2024"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 285,
+   "sha256_json": "ce796563d5698b7aed791c6fbeb7e0f9610e8077c1bd8bd4fa55e3d2169337a1",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg16_16_1_4_v1312": {
+   "jenis": "dinamis",
+   "var": 1312,
+   "judul": "16.1.4* Proporsi penduduk yang merasa aman berjalan sendirian di area tempat tinggalnya berdasarkan provinsi",
+   "satuan": "Persen",
+   "last_update": [
+    "2026-04-30 11:34:42"
+   ],
+   "tahun": [
+    "2014",
+    "2017",
+    "2020",
+    "2025"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 143,
+   "sha256_json": "14f30e70d545fd8e5e5fac61d41fb0d220dcf493f3d64dedaa3aae05eb1297a6",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg16_16_9_1_v1410": {
+   "jenis": "dinamis",
+   "var": 1410,
+   "judul": "Proporsi anak umur di bawah 5 tahun yang kelahirannya dicatat oleh lembaga pencatatan sipil Menurut Provinsi",
+   "satuan": "Persen",
+   "last_update": [
+    "2026-08-28 02:54:03"
+   ],
+   "tahun": [
+    "2015",
+    "2016",
+    "2017",
+    "2018",
+    "2019",
+    "2020",
+    "2021",
+    "2022",
+    "2023",
+    "2024",
+    "2025"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 393,
+   "sha256_json": "e6b8ba50715851c7b33c05af0a8625e73ea77a707c485796577b5d2b90d9f266",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg16_16_9_1_b_v1831": {
+   "jenis": "dinamis",
+   "var": 1831,
+   "judul": "Persentase Anak Berumur 0-17 Tahun yang Memiliki Akta Kelahiran Menurut Provinsi",
+   "satuan": "Persen",
+   "last_update": [
+    "2024-05-02 16:00:31"
+   ],
+   "tahun": [
+    "2015",
+    "2016",
+    "2017",
+    "2018",
+    "2019",
+    "2020",
+    "2021",
+    "2022",
+    "2023"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 331,
+   "sha256_json": "65217f9aeb4550dd9742848fd5eac79e754f3950f40e9f385622c0f7f2bb8f75",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg16_16_2_1_a_v2738": {
+   "jenis": "dinamis",
+   "var": 2738,
+   "judul": "16.2.1 (a) Proporsi rumah tangga yang memiliki anak umur 1-17 tahun yang mengalami hukuman fisik dan/atau agresi psikologis dari pengasuh dalam setahun terakhir berdasarkan provinsi",
+   "satuan": "Persen",
+   "last_update": [
+    "2026-04-30 11:37:04"
+   ],
+   "tahun": [
+    "2014",
+    "2020"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 69,
+   "sha256_json": "2729511103be3b96bc01f74f66f642310249f3ebccaf1177731a230c47e2f629",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg16_16_3_1_a_v2740": {
+   "jenis": "dinamis",
+   "var": 2740,
+   "judul": "16.3.1.(a) Proporsi korban kekerasan dalam 12 bulan terakhir yang melaporkan kepada polisi berdasarkan provinsi",
+   "satuan": "Persen",
+   "last_update": [
+    "2026-04-30 11:39:06"
+   ],
+   "tahun": [
+    "2020",
+    "2021",
+    "2022",
+    "2023",
+    "2024"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 135,
+   "sha256_json": "a9770f81c98c9675c9fe219ee1facb7838fa4aafe214d6f6c2df44bb46b452a5",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  },
+  "sdg17_17_1_1_v1254": {
+   "jenis": "dinamis",
+   "var": 1254,
+   "judul": "Total pendapatan pemerintah sebagai proporsi terhadap PDB menurut sumbernya",
+   "satuan": "",
+   "last_update": [
+    "2019-12-01 08:22:44"
+   ],
+   "tahun": [
+    "2015",
+    "2016"
+   ],
+   "periode": [
+    "Tahun"
+   ],
+   "baris": 70,
+   "sha256_json": "0bdc1b62f4a7ec0d96175254a4a4e0df7421b3ee89e0d08fd29a5b878d67c531",
+   "diunduh": "2026-10-20T12:40:25+07:00"
+  }
+ },
+ "gagal": {},
+ "diunduh": "2026-10-20T12:40:25+07:00"
+}
