@@ -1,0 +1,3 @@
+seri_kode,n_pasangan,n_turun,n_naik,n_tetap,persen_arah_dominan,median_delta,mean_delta,indikasi_patahan,alasan
+var1353,33,26,5,2,78.78787878787878,-11.0,-14.090909090909092,ya,perubahan searah di hampir semua provinsi; kandidat patahan/revisi seri
+var1394,33,21,12,0,63.63636363636363,-1.1999999999999957,-0.14545454545454495,tidak,arah perubahan campuran; tidak ada indikasi patahan serentak

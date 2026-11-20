@@ -36,12 +36,25 @@ def baca_data(jalur, seri):
 
 
 def baca_metadata(jalur, seri=None):
-    """Metadata indikator (metadata/sumberN_indikator.json) atau daftar sumber (metadata/sumber.json)."""
+    """Membaca metadata WDI dan menyertakan lineage."""
     _, baris = _halaman(jalur)
+
     if seri is not None:
-        baris = [b for b in baris if b.get("id") in set(seri)]
-    df = pd.DataFrame([{k: (v.get("value") if isinstance(v, dict) else
-                            (json.dumps(v, ensure_ascii=False) if isinstance(v, list) else v))
-                        for k, v in b.items()} for b in baris])
+        baris = [b for b in baris if str(b.get("id")) in set(seri)]
+
+    df = pd.DataFrame([
+        {
+            k: (
+                v.get("value") if isinstance(v, dict)
+                else json.dumps(v, ensure_ascii=False) if isinstance(v, list)
+                else v
+            )
+            for k, v in b.items()
+        }
+        for b in baris
+    ])
+
     df["_berkas_raw"] = jalur
+    df["_sha256_raw"] = sha256_raw(jalur)
+
     return df

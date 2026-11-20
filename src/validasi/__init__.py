@@ -2,7 +2,7 @@
 
 Aturan keras (umum di aturan.py, khas kasus di khusus.py) menghentikan pipeline bila gagal. Aturan
 peringatan hanya dilaporkan. Hasilnya di reports/validasi.md; data dictionary ditulis ulang dari data.
-Di akhir, angka semua komponen ditulis ke results/124450055/metrics.json.
+Di akhir, angka semua komponen ditulis ke results/kelompok-03/metrics.json.
 """
 import pandera.pandas as pa
 
@@ -48,7 +48,7 @@ def jalankan(silver, gold):
     simpan_angka()
     a = angka()
     metrik = {k: v for k, v in a.items() if isinstance(v, (int, float)) and not isinstance(v, bool)}
-    tulis_hasil("124450055", metrik)
+    tulis_hasil("kelompok-03", metrik)
     if len(keras_gagal):
         raise SystemExit(f"Validasi gagal: {', '.join(keras_gagal['aturan'])}. Lihat reports/validasi.md")
     return tabel

@@ -1,4 +1,4 @@
-# Pilihan basis data (bagian laporan tim)
+# Pilihan basis data (draf bagian laporan tim)
 
 **Pilihan: DuckDB** (`data/gold/gudang.duckdb`, dibuat ulang oleh `python pipeline.py`; tidak di-commit).
 

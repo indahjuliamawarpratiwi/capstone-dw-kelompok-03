@@ -233,3 +233,4 @@ def baca_manifest_asal(jalur):
     df = pd.DataFrame(baris)
     df["_berkas_raw"] = jalur
     return df
+

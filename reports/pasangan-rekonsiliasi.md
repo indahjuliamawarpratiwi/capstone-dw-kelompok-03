@@ -2,9 +2,7 @@
 
 Dihasilkan `python pipeline.py` (`src/gold/nasional.py`) dari Silver dan `src/konfigurasi.py`. Selisih dihitung di Sprint 2; Sprint 1 memastikan setiap pasangan memang sebanding dan mencatat tahun yang beririsan.
 
-Tabel nasional (periode x seri, semua rincian, tampilan lebar): `reports/tabel-nasional.csv`. Kolom BPS hanya terisi pada tahun survei; itu bentuk datanya, tidak diisi.
-
-Untuk SDG 3.7.2, perbandingan tiga seri memakai `var1353` (BPS, cakupan 15–19), `MDG_0000000003` rincian `umur=15-19`, dan `SP.ADO.TFRT` (WDI, 15–19). Ketiganya menarget perempuan 15–19; kelompok umur disamakan sebelum selisih dihitung. Tidak ada tahun yang beririsan untuk ketiganya, jadi selisih tiga seri tidak dihitung dan perbandingan dilakukan berpasangan (P1, P2, P4). Untuk P3, `var1394` dan `SDGFPALL` sama-sama perempuan 15–49, tetapi status perkawinan dan penyebutnya belum tentu sama; karena itu P3 diberi kategori definisi.
+Tabel nasional (periode x seri, rincian total, tampilan lebar): `reports/tabel-nasional.csv`. Kolom BPS hanya terisi pada tahun survei; itu bentuk datanya, tidak diisi.
 
 ## Ringkasan pasangan
 

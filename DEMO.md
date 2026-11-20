@@ -6,7 +6,7 @@ Demo memperlihatkan alur yang bisa diulang, bukan tampilan yang cantik. Rekam la
 |---|---|---|
 | 0–1 | Kasus dan Sprint Goal | `sprint/sprint-1/sprint-goal.md` |
 | 1–2 | Data mentah lolos sha256 dari klon bersih | `python unduh_data.py --kasus 3` |
-| 2–4 | Satu perintah dari mentah sampai Silver dan validasi | `python pipeline.py` (±1 detik) |
+| 2–4 | Satu perintah dari mentah sampai Silver dan validasi | `python pipeline.py` (±1.8 detik) |
 | 4–5 | Pemeriksa skema | `python -m src.common.skema data/silver/silver.parquet` → LOLOS 235 baris |
 | 5–6 | Satu pembaca dan jumlah baris per berkas | `src/ekstraksi/`, `reports/ekstraksi.md` |
 | 6–7 | Kelompok umur dan satuan `var1353` dari judul JSON dan metadata WHO/WDI | `reports/metadata.md`, `docs/seri.csv` |
