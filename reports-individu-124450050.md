@@ -1,8 +1,5 @@
 # Laporan perorangan — <Anash Tasya Ausyaqila> (124450050), komponen <Validasi dan Dokumentasi>
 
-Salin berkas ini menjadi `reports/individu/<nim>.md`. Paling banyak 1200 kata di luar tabel
-dan kode. Setiap klaim angka harus dapat ditelusuri ke kode atau keluaran yang sudah di-*commit*.
-
 1. Komponen saya
 
 Saya bertanggung jawab pada komponen Validasi dan Dokumentasi dalam pipeline pengolahan data SDG 3.7 tentang kesehatan reproduksi remaja. Tugas saya berfokus pada pemeriksaan kualitas data, pengecekan kelengkapan nilai, validasi konsistensi struktur data, serta dokumentasi sumber data dan checksum SHA-256 agar setiap data yang digunakan dapat ditelusuri kembali ke file mentahnya. Komponen ini bertujuan memastikan data yang masuk ke tahap Silver dan Gold memiliki kualitas serta asal-usul yang jelas.
