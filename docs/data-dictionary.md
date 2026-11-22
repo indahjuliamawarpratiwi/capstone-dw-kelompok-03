@@ -21,7 +21,7 @@ Satu baris = satu seri x wilayah x periode x rincian x berkas sumber. Kunci unik
 | batas_bawah | float64 | 235 | — | RATE_*_NL WHO | batas bawah ketidakpastian; kosong bila sumber tidak memberi |
 | batas_atas | float64 | 235 | — | RATE_*_NU WHO | batas atas ketidakpastian; kosong bila sumber tidak memberi |
 | rujukan_tahun | Int64 | 235 | — | var.note BPS; log | lebar jendela rujukan survei (tahun sebelum survei); kosong bila tidak berlaku |
-| _berkas_raw | str | 0 | bps/2026-10-20/json/sdg3_3_7_1_v1394.json, bps/2026-10-20/json/sdg3_3_7_2_v1353.json, wdi/2026-10-20/data/kelompok-03-hal-01.json, who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv, who_gho/2026-10-20/datadot/8074BD9_SDGFPALL.csv | jalur berkas mentah relatif data/raw/ | lineage: berkas asal baris ini |
+| _berkas_raw | str | 0 | bps/2026-10-20/json/sdg3_3_7_1_v1394.json, bps/2026-10-20/json/sdg3_3_7_2_v1353.json, wdi/2026-10-20/data/kelompok-07-hal-01.json, who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv, who_gho/2026-10-20/datadot/8074BD9_SDGFPALL.csv | jalur berkas mentah relatif data/raw/ | lineage: berkas asal baris ini |
 | _sha256_raw | str | 0 | 230ce163135e9ea9e078649b2812136780e9e2db9d4c110dc3e21f2fe50faf5a, 6ae359c6df0dfd6ce210233dc28ada9060be0996f855288d6c4fbfee88b55c74, 894de8e94f8c2c76aaa44f3a3f541607429e924d9101a80a2d5eebcfe433284b, 9a8729675761d697bd5556d66fd903ed841ee454e7324d41084dc09b9905f912, efd85410d3d2939a3fabcb1a17489a3860985eec2685d49787919c3657a7e702 | src.common.manifest.sha256_raw | lineage: sidik isi berkas asal, dicocokkan dengan MANIFEST.csv |
 
 ## Kamus rincian
@@ -41,13 +41,13 @@ Nama dimensi dan kode yang sah:
 
 ## Satuan, kode SDG, dan cakupan per seri
 
-| seri_kode | satuan | sdg_kode | cakupan | bukti_satuan |
-|---|---|---|---|---|
-| var1394 | persen | 3.7.1 | perempuan 15–49 atau pasangannya; sumber SDKI (var.note); hanya tahun survei 2012 dan 2017 | var.unit: 'Persen' |
-| var1353 | per_1000_perempuan_seumur | 3.7.2 | umur 15–19 saja (judul var.label; tidak ada kelompok 10–14); sumber IDHS/SDKI (var.note); judul berakhir dengan spasi | var.unit dan kolom satuan CSV kosong; judul menyebut perempuan 15–19; definisi baku indikator yang sama di metadata WHO ('per 1,000 females in the respective age group') dan nama WDI ('births per 1,000 women ages 15-19'); besaran angka (puluhan) sesuai per 1.000, bukan persen |
-| SP.ADO.TFRT | per_1000_perempuan_seumur | 3.7.2 | umur 15–19; estimasi model World Population Prospects (UN Population Division), tahunan | name: '(births per 1,000 women ages 15-19)' |
-| MDG_0000000003 | per_1000_perempuan_seumur | 3.7.2 | perempuan; dua kelompok umur (10–14, 15–19) di kolom rincian; data survei/registrasi, tahun tidak lengkap [dimensi tetap di berkas: DIM_SEX=FEMALE] | kolom RATE_PER_1000_N; UnitOfMeasure: 'Annual number of births per 1000 adolescent women' |
-| SDGFPALL | persen | 3.7.1 | perempuan 15–49; penyebut = permintaan KB total (pemakai semua metode + kebutuhan tak terpenuhi) [dimensi tetap di berkas: DIM_SEX=FEMALE; DIM_AGE=Y15T49] | kolom RATE_PER_100_N |
+| seri_kode | satuan | sdg_kode | cakupan | bukti_satuan | bukti_sdg |
+|---|---|---|---|---|---|
+| var1394 | persen | 3.7.1 | perempuan 15–49 atau pasangannya; sumber SDKI (var.note); hanya tahun survei 2012 dan 2017 | var.unit: 'Persen' | judul TPB nasional 3.7.1; besaran angkanya lebih dekat ke pemakaian kontrasepsi modern daripada kebutuhan KB terpenuhi (K-009) |
+| var1353 | per_1000_perempuan_seumur | 3.7.2 | umur 15–19 saja (judul var.label; tidak ada kelompok 10–14); sumber IDHS/SDKI (var.note); judul berakhir dengan spasi | var.unit dan kolom satuan CSV kosong; judul menyebut perempuan 15–19; definisi baku indikator yang sama di metadata WHO ('per 1,000 females in the respective age group') dan nama WDI ('births per 1,000 women ages 15-19'); besaran angka (puluhan) sesuai per 1.000, bukan persen | judul var.label = angka kelahiran remaja 15–19; indikator global 3.7.2 |
+| SP.ADO.TFRT | per_1000_perempuan_seumur | 3.7.2 | umur 15–19; estimasi model World Population Prospects (UN Population Division), tahunan | name/sourceNote: '(births per 1,000 women ages 15-19)' | metadata/sumber46_indikator.json source id=46 'Sustainable Development Goals'; definisi 'births per 1,000 women ages 15-19' = 3.7.2 |
+| MDG_0000000003 | per_1000_perempuan_seumur | 3.7.2 | perempuan; dua kelompok umur (10–14, 15–19) di kolom rincian; data survei/registrasi, tahun tidak lengkap [dimensi tetap di berkas: DIM_SEX=FEMALE] | kolom RATE_PER_1000_N; UnitOfMeasure: 'Annual number of births per 1000 adolescent women'; DefinitionText 'per 1,000 females in the respective age group' | metadata WHO DefinitionText; AlternativeCodes MDG_0000000003 |
+| SDGFPALL | persen | 3.7.1 | perempuan 15–49; penyebut = permintaan KB total (pemakai semua metode + kebutuhan tak terpenuhi) [dimensi tetap di berkas: DIM_SEX=FEMALE; DIM_AGE=Y15T49] | kolom RATE_PER_100_N; UnitOfMeasure/FullName WHO menyertakan (%) | metadata WHO DefinitionText 'demand for family planning satisfied with modern methods'; AlternativeCodes SDGFPALL |
 
 ## Kode wilayah
 
