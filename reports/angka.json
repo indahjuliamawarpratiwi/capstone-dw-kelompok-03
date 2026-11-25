@@ -12,9 +12,13 @@
  "baris_koreksi_satuan": 69,
  "baris_koreksi_sdg": 0,
  "baris_mentah": 374,
+<<<<<<< HEAD
  "baris_nasional_gold": 89,
  "baris_panel_gold": 152,
  "baris_rekonsiliasi": 28,
+=======
+ "baris_nasional_ekstraksi": 101,
+>>>>>>> origin/main
  "baris_rujukan": 0,
  "baris_silver": 235,
  "baris_sql": 235,
@@ -42,6 +46,7 @@
  "outlier_ditandai": 3,
  "parsial_ditandai": 0,
  "pasangan_konteks": 0,
+ "pasangan_panduan": 2,
  "pasangan_rekonsiliasi": 4,
  "patahan_definisi": 0,
  "patahan_ditandai": 0,

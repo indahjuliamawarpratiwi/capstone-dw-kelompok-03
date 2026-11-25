@@ -28,6 +28,7 @@ SERI = {
         bukti_sdg="judul TPB nasional 3.7.1; besaran angkanya lebih dekat ke pemakaian kontrasepsi modern daripada "
                   "kebutuhan KB terpenuhi (lihat P2 dan log K-009)",
         cakupan="perempuan 15–49 atau pasangannya; sumber SDKI (var.note); hanya tahun survei 2012 dan 2017",
+        koreksi="tidak ada (satuan persen dan kode 3.7.1 sesuai katalog)",
     ),
     "var1353": dict(
         sumber="bps", tingkat="provinsi",
@@ -40,27 +41,31 @@ SERI = {
         bukti_sdg="judul = angka kelahiran remaja 15–19, indikator global 3.7.2",
         cakupan="umur 15–19 saja (judul var.label; tidak ada kelompok 10–14); sumber IDHS/SDKI (var.note); "
                 "judul berakhir dengan spasi",
-        koreksi="satuan tidak_ada -> per_1000_perempuan_seumur",
+        koreksi="satuan tidak_ada -> per_1000_perempuan_seumur (K-007); nama baku menambahkan satuan per 1.000 (K-003, K-007, K-012)",
     ),
     "SP.ADO.TFRT": dict(
         sumber="wdi", tingkat="nasional", nama="Adolescent fertility rate (births per 1,000 women ages 15-19)",
-        satuan=ABR, katalog_satuan="—", bukti_satuan="name: '(births per 1,000 women ages 15-19)'",
-        sdg="3.7.2", katalog_sdg="—", bukti_sdg="tercantum di metadata/sumber46_indikator.json (Sustainable Development Goals)",
+        satuan=ABR, katalog_satuan="—", bukti_satuan="name/sourceNote: '(births per 1,000 women ages 15-19)'",
+        sdg="3.7.2", katalog_sdg="—",
+        bukti_sdg="metadata/sumber46_indikator.json source id=46 'Sustainable Development Goals'; definisi 'births per 1,000 women ages 15-19' = 3.7.2 (lihat MDG_0000000003)",
         cakupan="umur 15–19; estimasi model World Population Prospects (UN Population Division), tahunan",
-        koreksi="kode SDG kosong -> 3.7.2",
+        koreksi="kode SDG kosong -> 3.7.2 (K-008); satuan kosong -> per_1000_perempuan_seumur (K-007)",
     ),
     "MDG_0000000003": dict(
         sumber="who_gho", tingkat="nasional", nama="Adolescent birth rate (per 1000 women in the age group)",
         satuan=ABR, katalog_satuan="—",
-        bukti_satuan="kolom RATE_PER_1000_N; UnitOfMeasure: 'Annual number of births per 1000 adolescent women'",
-        sdg="3.7.2", katalog_sdg="3.7.2", bukti_sdg="metadata WHO",
+        bukti_satuan="kolom RATE_PER_1000_N; UnitOfMeasure: 'Annual number of births per 1000 adolescent women'; DefinitionText 'per 1,000 females in the respective age group'",
+        sdg="3.7.2", katalog_sdg="3.7.2", bukti_sdg="metadata WHO DefinitionText; AlternativeCodes MDG_0000000003",
         cakupan="perempuan; dua kelompok umur (10–14, 15–19) di kolom rincian; data survei/registrasi, tahun tidak lengkap",
+        koreksi="satuan kosong -> per_1000_perempuan_seumur (K-007); nama baku menambahkan satuan per 1.000 (K-029)",
     ),
     "SDGFPALL": dict(
         sumber="who_gho", tingkat="nasional", nama="Family planning satisfied with modern methods (%)",
-        satuan="persen", katalog_satuan="—", bukti_satuan="kolom RATE_PER_100_N",
-        sdg="3.7.1", katalog_sdg="3.7.1", bukti_sdg="metadata WHO (DefinitionText: demand for family planning satisfied with modern methods)",
+        satuan="persen", katalog_satuan="—", bukti_satuan="kolom RATE_PER_100_N; UnitOfMeasure/FullName WHO menyertakan (%)",
+        sdg="3.7.1", katalog_sdg="3.7.1",
+        bukti_sdg="metadata WHO DefinitionText 'demand for family planning satisfied with modern methods'; AlternativeCodes SDGFPALL",
         cakupan="perempuan 15–49; penyebut = permintaan KB total (pemakai semua metode + kebutuhan tak terpenuhi)",
+        koreksi="satuan kosong -> persen (K-029); nama baku menambahkan tanda % (K-029)",
     ),
 }
 
