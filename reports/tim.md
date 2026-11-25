@@ -16,6 +16,16 @@ yang tidak ditulis BPS, dan penyebut KB yang berbeda antara BPS dan WHO.
 (1 berkas data, 3 metadata), WHO GHO (2 CSV, 2 metadata). Semua berkas tertangani oleh `ekstraksi.jalankan()`
 (374 baris mentah di berkas data). Setiap baris Silver membawa `_berkas_raw` dan `_sha256_raw`.
 
+Respons JSON mentah tetap disimpan apa adanya di `data/raw/` sebagai lapis Bronze/arsip lineage, bukan
+dimuat sebagai dokumen ke dalam basis data. Untuk Silver dan Gold dipakai **DuckDB** (`data/gold/gudang.duckdb`,
+dibuat ulang oleh `python pipeline.py`, tidak di-commit): DDL ada di `src/gold/silver.sql` dengan empat tabel
+ber-kunci primer jelas — `silver` (235 baris), `panel_gold` (134), `nasional` (101), dan `rekonsiliasi` (2).
+DuckDB dipilih karena skema lapis ini stabil, kunci komposit serta CHECK dapat dipaksakan, dan tabel dapat
+di-query/join/agregasi langsung dari Parquet tanpa server; JSON dokumen lebih fleksibel untuk variasi field
+sumber tetapi nested/heterogen, sulit divalidasi dan lambat untuk query analitik. Dengan demikian JSON cocok
+pada Bronze untuk keterlacakan, sedangkan tabel SQL cocok pada Silver (konsistensi) dan Gold (panel,
+agregasi nasional, serta pasangan rekonsiliasi).
+
 ## Masalah data dan penanganannya
 
 | Masalah | Bukti | Keputusan | Baris terdampak | Log |

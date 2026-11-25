@@ -1,7 +1,7 @@
-"""Persiapan tahap 5 — memuat Silver ke DuckDB dengan kunci primer dan batasan.
+"""Tahap 5 — memuat Silver dan Gold ke DuckDB dengan kunci primer dan batasan.
 
 Basis data dibuat ulang setiap kali (berkas lama dihapus), jadi hasilnya selalu sama dengan
-data/silver/silver.parquet. Berkas .duckdb tidak di-commit; jalankan pipeline untuk membuatnya.
+Parquet Silver dan Gold. Berkas .duckdb tidak di-commit; jalankan pipeline untuk membuatnya.
 """
 from pathlib import Path
 
@@ -12,24 +12,54 @@ from src.laporan import ROOT, catat
 
 DB = ROOT / "data" / "gold" / "gudang.duckdb"
 DDL = Path(__file__).with_name("silver.sql")
+GOLD = ROOT / "data" / "gold"
+PANEL = GOLD / "panel_gold.parquet"
+NASIONAL = GOLD / "nasional_periode_seri.parquet"
+REKONSILIASI = GOLD / "pasangan_rekonsiliasi.csv"
+KOLOM_PANEL = ["wilayah_kode", "nama_wilayah", "periode", "jenis_periode", "seri_kode",
+               "sumber", "rincian", "nilai", "satuan", "sdg_kode"]
+
+
+def _panel(silver):
+    p = silver.loc[silver["wilayah_kode"] != 9999, KOLOM_PANEL].copy()
+    return p.sort_values(["wilayah_kode", "periode", "seri_kode", "rincian"]).reset_index(drop=True)
+
+
+def _sisip(con, nama, df):
+    kolom = ", ".join(df.columns)
+    con.register(f"{nama}_df", df)
+    con.execute(f"INSERT INTO {nama} ({kolom}) SELECT {kolom} FROM {nama}_df")
+    return con.execute(f"SELECT count(*) FROM {nama}").fetchall()[0][0]
 
 
 def jalankan(silver):
-    DB.parent.mkdir(parents=True, exist_ok=True)
+    GOLD.mkdir(parents=True, exist_ok=True)
     DB.unlink(missing_ok=True)
+
     seri = pd.read_csv(ROOT / "docs" / "seri.csv")[["seri_kode", "sumber", "tingkat", "nama_baku", "satuan", "sdg_kode"]]
     seri["sdg_kode"] = seri["sdg_kode"].astype(str)
     s = silver.copy()
     s["rujukan_tahun"] = s["rujukan_tahun"].astype("float64")
+    panel = _panel(silver)
+    panel.to_parquet(PANEL, index=False)
+    nasional = pd.read_parquet(NASIONAL)
+    rekonsiliasi = pd.read_csv(REKONSILIASI, keep_default_na=False, dtype=str)
+
     with duckdb.connect(str(DB)) as con:
         con.execute(DDL.read_text(encoding="utf-8"))
-        con.register("seri_df", seri)
-        con.execute("INSERT INTO seri SELECT * FROM seri_df")
-        con.register("silver_df", s)
-        kolom = ", ".join(s.columns)
-        con.execute(f"INSERT INTO silver ({kolom}) SELECT {kolom} FROM silver_df")
-        n = con.execute("SELECT count(*) FROM silver").fetchone()[0]
-    if n != len(silver):
-        raise AssertionError(f"DuckDB memuat {n} baris, Silver {len(silver)} baris")
-    catat(baris_sql=n)
-    return n
+        jumlah = {
+            "seri": _sisip(con, "seri", seri),
+            "silver": _sisip(con, "silver", s),
+            "panel_gold": _sisip(con, "panel_gold", panel),
+            "nasional": _sisip(con, "nasional", nasional),
+            "rekonsiliasi": _sisip(con, "rekonsiliasi", rekonsiliasi),
+        }
+
+    for nama, sumber in [("silver", len(silver)), ("panel_gold", len(panel)),
+                         ("nasional", len(nasional)), ("rekonsiliasi", len(rekonsiliasi))]:
+        if jumlah[nama] != sumber:
+            raise AssertionError(f"DuckDB {nama}: {jumlah[nama]} baris, sumber {sumber} baris")
+
+    catat(baris_sql=jumlah["silver"])
+    return {"baris_sql": jumlah["silver"], "baris_sql_panel": jumlah["panel_gold"],
+            "baris_sql_nasional": jumlah["nasional"], "baris_sql_rekonsiliasi": jumlah["rekonsiliasi"]}
