@@ -1,8 +1,6 @@
-"""Tahap 4–6 — Gold. Sprint 1: tabel nasional, daftar pasangan rekonsiliasi, dan Silver di DuckDB.
+"""Tahap 4–6 — Gold: panel, tabel nasional, rekonsiliasi, dan pemuatan ke DuckDB."""
+from src.gold import muat_sql, nasional, panel, rekonsiliasi
 
-Panel provinsi x periode x indikator dan tabel rekonsiliasi dengan selisih dikerjakan di Sprint 2.
-"""
-from src.gold import muat_sql, nasional
 
 
 def jalankan(silver, ekstraksi=None):
@@ -10,4 +8,10 @@ def jalankan(silver, ekstraksi=None):
     hasil["baris_sql"] = muat_sql.jalankan(silver)
     if ekstraksi is not None:
         hasil["ekstraksi"] = ekstraksi
+    return hasil
+def jalankan(silver, ekstraksi=None):
+    hasil = nasional.jalankan(silver, ekstraksi)
+    hasil.update(panel.jalankan(silver))
+    hasil.update(rekonsiliasi.jalankan(hasil["nasional_gold"]))
+    hasil["baris_sql"] = muat_sql.jalankan(silver, hasil)
     return hasil
