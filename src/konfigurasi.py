@@ -114,3 +114,9 @@ PASANGAN = [
          alasan_rincian="WHO umur=15-19",
          pertanyaan=[("Apakah sumbernya sama?", "Tidak: MethodOfEstimationOverview WHO menyebut registrasi sipil dan survei; WDI dari WPP.")]),
 ]
+
+KATEGORI_BAKU = {"P1": "metode berbeda", "P2": "metode berbeda", "P3": "definisi berbeda", "P4": "metode berbeda"}
+UBAH_PASANGAN = {"P2": dict(tahun_terdekat=1)}
+for _p in PASANGAN:
+    _p["kategori_baku"] = KATEGORI_BAKU[_p["id"]]
+    _p.update(UBAH_PASANGAN.get(_p["id"], {}))

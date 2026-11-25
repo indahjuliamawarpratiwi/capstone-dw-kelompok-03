@@ -1,6 +1,6 @@
 # Data dictionary — Kasus 03 Kesehatan reproduksi remaja
 
-Ditulis ulang otomatis oleh `python pipeline.py` (`src/dokumen.py`). Tipe, rentang, dan jumlah kosong dihitung dari `data/silver/silver.parquet`.
+Bagian Silver ditulis ulang otomatis oleh `python pipeline.py` (`src/dokumen.py`). Bagian Gold dan SQL mendokumentasikan artefak yang dihasilkan `src/gold/` dan `src/validasi/`; tipe, rentang, dan jumlah kosong dihitung dari artefak aktual.
 
 ## data/silver/silver.parquet (235 baris)
 
@@ -64,3 +64,106 @@ Nama dimensi dan kode yang sah:
 2. Baris berkas itu di `data/raw/MANIFEST.csv` memuat sha256 `230ce163135e…`; nilainya sama dengan `_sha256_raw`, jadi berkas yang dibaca adalah berkas yang tercatat.
 
 3. Di berkas mentah, angka ditemukan pada wilayah, periode, dan rincian yang sama (untuk JSON BPS: kunci `datacontent` = kode wilayah + var + turvar + kode tahun + turtahun).
+
+## data/gold/nasional.parquet (89 baris)
+
+Satu baris = satu seri × rincian × periode tingkat Indonesia. Kunci unik: `seri_kode + rincian + periode`. Rincian WHO `umur=10-14` tetap di Silver dan tidak masuk Gold.
+
+| kolom | tipe | kosong | definisi / satuan / status |
+|---|---|---:|---|
+| seri_kode | str | 0 | seri BPS, WHO GHO, atau WDI; 5 nilai |
+| rincian | str | 0 | `total` (75 baris) atau `umur=15-19` (14 baris) |
+| sumber | str | 0 | `bps`, `who_gho`, `wdi` |
+| periode | str | 0 | tahun `YYYY`; hanya tahun yang diterbitkan sumber |
+| jenis_periode | str | 0 | semua `tahun` |
+| nilai | float64 | 0 | angka sesuai satuan seri; tidak diimputasi |
+| satuan | str | 0 | `persen` atau `per_1000_perempuan_seumur` |
+| batas_bawah | float64 | 89 | kosong: sumber tidak memberi batas ketidakpastian |
+| batas_atas | float64 | 89 | kosong: sumber tidak memberi batas ketidakpastian |
+| rujukan_tahun | float64 | 89 | kosong: tidak berlaku untuk baris nasional ini |
+| asal | str | 0 | `baris_indonesia` (4 baris BPS) atau `pembanding` (85 baris WHO/WDI) |
+| _berkas_raw | str | 0 | jalur berkas mentah; 5 berkas |
+| _sha256_raw | str | 0 | sidik berkas mentah dari MANIFEST.csv |
+
+## data/gold/panel.parquet (152 baris)
+
+Satu baris = satu indikator × provinsi × periode, termasuk sel kosong. Kunci unik: `seri_kode + wilayah_kode + periode`. `9999` tidak masuk panel.
+
+| kolom | tipe | kosong | definisi / satuan / status |
+|---|---|---:|---|
+| sumber | str | 0 | semua `bps` |
+| seri_kode | str | 0 | `var1394` atau `var1353` |
+| wilayah_kode | int64 | 0 | 38 kode provinsi BPS; bukan 9999 |
+| nama_wilayah | str | 0 | nama baku susunan 38 provinsi 2025 |
+| periode | str | 0 | `2012` atau `2017` |
+| jenis_periode | str | 0 | `tahun` |
+| rincian | str | 0 | `total` |
+| nilai | float64 | 18 | kosong hanya pada sel `belum_ada`; tidak diinterpolasi |
+| satuan | str | 18 | `persen` untuk `var1394`; `per_1000_perempuan_seumur` untuk `var1353`; di tabel SQL diisi dari `K.SERI` agar `NOT NULL` |
+| sdg_kode | str | 18 | `3.7.1` / `3.7.2`; kosong pada sel tanpa nilai |
+| status_sel | str | 0 | `terisi` (134) atau `belum_ada` (18) |
+| penanda | str | 0 | `''` (147), `outlier` (3), `patahan_wilayah` (2); bukan string kosong untuk sel bertanda |
+| alasan_sel | str | 0 | alasan status sel; kosong sebagai string untuk sel terisi |
+| batas_bawah | float64 | 152 | tidak dipakai di panel |
+| batas_atas | float64 | 152 | tidak dipakai di panel |
+| rujukan_tahun | Int64 | 152 | tidak dipakai di panel |
+| _berkas_raw | str | 18 | berkas BPS kanonik; kosong pada sel tanpa nilai |
+| _sha256_raw | str | 18 | sidik berkas BPS; kosong pada sel tanpa nilai |
+
+## data/gold/panel_lebar.parquet (34 baris × 6 kolom)
+
+Satu baris per provinsi dengan kolom nilai `var1394_2012`, `var1353_2012`, `var1394_2017`, `var1353_2017`. Kolom 2012 masing-masing memiliki **1 nilai kosong** (Kalimantan Utara belum tercakup); kolom 2017 tidak kosong. Format ini berbeda dari kunci dosen (periode sebagai baris), tetapi nilainya sama dengan `panel.parquet`.
+
+## data/gold/rekonsiliasi.parquet (28 baris)
+
+Satu baris = satu pasangan × pembanding × periode. Kunci unik: `pasangan_id + seri_pembanding + rincian_pembanding + periode`.
+
+| kolom | tipe | kosong | definisi / satuan / status |
+|---|---|---:|---|
+| pasangan_id | str | 0 | `P1`–`P4` |
+| jenis | str | 0 | semua `selisih` |
+| seri_utama | str | 0 | `var1353`, `var1394`, atau `MDG_0000000003` |
+| rincian_utama | str | 0 | `total` atau `umur=15-19` |
+| seri_pembanding | str | 0 | `SP.ADO.TFRT` atau `SDGFPALL` |
+| rincian_pembanding | str | 0 | `total` atau `umur=15-19` |
+| periode | str | 0 | tahun utama yang direkonsiliasi |
+| tahun_utama | str | 0 | tahun nilai utama; sama dengan `periode` |
+| tahun_pembanding | str | 0 | tahun pembanding; untuk P2 = 2011/2016 |
+| selisih_tahun | int64 | 0 | `tahun_utama − tahun_pembanding`; 1 pada 2 baris P2, 0 pada sisanya |
+| nilai_utama | float64 | 8 | kosong pada 8 baris tanpa pasangan |
+| nilai_pembanding | float64 | 0 | nilai pembanding dari Gold nasional |
+| satuan | str | 0 | `persen` (P3) atau `per_1000_perempuan_seumur` (P1/P2/P4) |
+| selisih | float64 | 8 | `nilai_utama − nilai_pembanding`; kosong tanpa pasangan |
+| selisih_relatif | float64 | 8 | `100 × selisih / nilai_pembanding`; bertanda |
+| asal | str | 0 | `keduanya` (20) atau `hanya_pembanding` (8) |
+| kategori | str | 0 | `metode berbeda` (18), `definisi berbeda` (2), `tanpa pasangan` (8) |
+| kategori_baku | str | 0 | kategori pasangan dari konfigurasi: metode/definisi berbeda |
+| alasan | str | 0 | alasan rincian dan keterbandingan |
+| jenis_perbandingan | str | 0 | `langsung` (18), `tahun_terdekat` (2), `tanpa_pasangan` (8) |
+| sumber_utama | str | 8 | `bps`/`who_gho`; kosong tanpa pasangan |
+| sumber_pembanding | str | 0 | `wdi`/`who_gho` |
+| _berkas_raw_utama | str | 8 | lineage utama; kosong tanpa pasangan |
+| _sha256_raw_utama | str | 8 | sidik utama; kosong tanpa pasangan |
+| _berkas_raw_pembanding | str | 0 | lineage pembanding |
+| _sha256_raw_pembanding | str | 0 | sidik pembanding |
+| penjelasan | str | 0 | alasan metodologis pasangan |
+| catatan | str | 26 | hanya 2 catatan P2 tentang tahun terdekat |
+
+## data/gold/gudang.duckdb (6 tabel)
+
+Dibuat ulang oleh `src/gold/muat_sql.py`; tidak di-commit. `tabel_sql=5` pada metrik menghitung tabel relasional, tidak termasuk `dokumen_mentah`.
+
+| tabel | baris | kunci primer | tipe/definisi ringkas | status kosong |
+|---|---:|---|---|---|
+| seri | 5 | seri_kode | VARCHAR: sumber, tingkat, nama_baku, satuan, sdg_kode | `sdg_kode` boleh kosong |
+| silver | 235 | sumber+seri+wilayah+periode+rincian+berkas | VARCHAR/INTEGER/DOUBLE; `_sha256_raw` 64 hex; FK ke seri | batas/rujukan/status_obs boleh kosong |
+| gold_panel | 152 | indikator+wilayah+periode | VARCHAR/INTEGER/DOUBLE; FK ke seri; `indikator` = `seri_kode` | nilai boleh kosong hanya bila sel bukan `terisi`; lineage dapat kosong |
+| gold_nasional | 89 | seri+rincian+periode | VARCHAR/DOUBLE/INTEGER; CHECK `asal` | batas/rujukan/_sha256_raw boleh kosong |
+| rekonsiliasi | 28 | pasangan+pembanding+rincian+periode | VARCHAR/DOUBLE; CHECK kategori dan selisih | nilai utama, selisih, relatif, catatan boleh kosong |
+| dokumen_mentah | 9 | _berkas_raw | VARCHAR + JSON; isi JSON mentah apa adanya | tidak ada kolom wajib kosong |
+
+Constraint penting: `gold_panel` CHECK `status_sel` dan `(status_sel='terisi') ⇔ (nilai IS NOT NULL)`; `rekonsiliasi` CHECK kategori baku dan `selisih = nilai_utama − nilai_pembanding`; `silver` CHECK wilayah, jenis periode, batas, dan panjang sha256. Validasi di `src/validasi/` memeriksa lapis parquet; `tests/test_sql_gold.py` memeriksa keberadaan tabel, jumlah baris, kunci unik, dan penolakan constraint.
+
+## Penelusuran satu nilai Gold
+
+Panel sel `var1353`, provinsi 1100, tahun 2012 bernilai 25,0. Nilai ini berasal dari Silver `(bps, var1353, 1100, 2012, total)` dengan `_berkas_raw = bps/2026-10-20/json/sdg3_3_7_2_v1353.json` dan sha256 `230ce163…`, lalu dimuat ke `gold_panel` sebagai `indikator = var1353`. Sel `belum_ada` Kaltara 2012 tidak memiliki nilai dan tidak memiliki lineage.
