@@ -62,15 +62,18 @@ CREATE TABLE nasional (
 );
 
 CREATE TABLE rekonsiliasi (
-    pasangan                     VARCHAR PRIMARY KEY,
-    sumber_seri                  VARCHAR NOT NULL,
-    rincian_dipakai              VARCHAR,
-    kelompok_umur                VARCHAR,
-    status_perkawinan_populasi   VARCHAR,
-    satuan                       VARCHAR NOT NULL,
-    periode_beririsan_3seri      VARCHAR,
-    periode_beririsan_berpasangan VARCHAR,
-    dapat_dibandingkan_langsung  VARCHAR,
-    alasan_keterbandingan        VARCHAR NOT NULL,
-    catatan                      VARCHAR
+    pasangan            VARCHAR NOT NULL,
+    seri_utama          VARCHAR NOT NULL,
+    pembanding          VARCHAR NOT NULL,
+    rincian_utama       VARCHAR NOT NULL,
+    rincian_pembanding  VARCHAR NOT NULL,
+    periode             VARCHAR NOT NULL,
+    nilai_utama         DOUBLE,
+    nilai_pembanding    DOUBLE,
+    selisih             DOUBLE,
+    status_pasangan     VARCHAR NOT NULL CHECK (status_pasangan IN ('berpasangan', 'tanpa_pasangan')),
+    kategori            VARCHAR NOT NULL CHECK (kategori IN ('definisi berbeda', 'metode berbeda', 'vintage berbeda', 'cakupan berbeda', 'belum terjelaskan')),
+    dugaan              VARCHAR,
+    bukti               VARCHAR,
+    PRIMARY KEY (pasangan, pembanding, periode)
 );
