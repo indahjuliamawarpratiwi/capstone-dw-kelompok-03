@@ -39,6 +39,9 @@
     "kunci_kembar": 0,
     "patahan_definisi": 0,
     "parsial_ditandai": 0,
+    "tabel_nasional_baris": 89,
+    "tabel_nasional_seri": 5,
+    "tabel_nasional_periode": 65,
     "pasangan_rekonsiliasi": 4,
     "pasangan_konteks": 0,
     "periode_beririsan": 18,
@@ -56,5 +59,5 @@
   },
   "seed": 0,
   "data_hash": "65d843138bf94478bde504634556ba0ca67a95e7f6e9810f99c45a2591fd6c63",
-  "perangkat": "Windows AMD64 Python 3.13.7"
+  "perangkat": "Linux x86_64 Python 3.13.18"
 }

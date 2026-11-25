@@ -5,7 +5,9 @@ Panel provinsi x periode x indikator dan tabel rekonsiliasi dengan selisih diker
 from src.gold import muat_sql, nasional
 
 
-def jalankan(silver):
+def jalankan(silver, ekstraksi=None):
     hasil = nasional.jalankan(silver)
     hasil["baris_sql"] = muat_sql.jalankan(silver)
+    if ekstraksi is not None:
+        hasil["ekstraksi"] = ekstraksi
     return hasil
