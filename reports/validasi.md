@@ -1,6 +1,6 @@
-# Hasil validasi Silver
+# Hasil validasi Silver dan Gold
 
-Dihasilkan `python pipeline.py` (`src/validasi/`). Aturan keras menghentikan pipeline bila gagal; peringatan dilaporkan untuk diperiksa manusia. Aturan juga diuji dengan baris yang sengaja dirusak (`pytest`, berkas `tests/test_validasi.py`).
+Dihasilkan `python pipeline.py` (`src/validasi/`). Aturan keras menghentikan pipeline bila gagal; peringatan dilaporkan untuk diperiksa manusia. Aturan juga diuji dengan salinan yang sengaja dirusak.
 
 | aturan | jenis | keterangan | hasil |
 |---|---|---|---|
@@ -16,6 +16,10 @@ Dihasilkan `python pipeline.py` (`src/validasi/`). Aturan keras menghentikan pip
 | abr_satu_satuan | keras (kasus) | angka kelahiran remaja BPS, WDI, WHO bersatuan per_1000_perempuan_seumur | LOLOS |
 | abr_10_14_lebih_kecil | peringatan (kasus) | angka kelahiran 10–14 ≥ 15–19 pada tahun yang sama (peringatan) | LOLOS |
 | kb_bps_di_bawah_who | peringatan (kasus) | KB BPS Indonesia > WHO kebutuhan KB terpenuhi (peringatan: periksa definisi) | LOLOS |
+| kunci_panel_unik | keras (Gold) | kunci panel Gold (wilayah_kode x periode) tidak kembar | LOLOS |
+| satuan_satu_per_indikator | keras (Gold) | setiap indikator/seri hanya punya satu satuan baku | LOLOS |
+| sel_gold_punya_pasangan_di_silver | keras (Gold) | setiap nilai sel di Gold berasal dari baris yang sah di Silver | LOLOS |
+| rekonsiliasi_punya_kategori | keras (Gold) | setiap baris pasangan rekonsiliasi memiliki kategori yang terisi | LOLOS |
 
 ## Kegagalan aturan umum
 
@@ -24,3 +28,11 @@ Tidak ada.
 ## Baris yang memicu aturan kasus
 
 Tidak ada.
+
+## Baris yang melanggar aturan Gold
+
+Tidak ada.
+
+## Konsistensi tabel DuckDB
+
+Semua tabel sesuai dengan sumbernya.
