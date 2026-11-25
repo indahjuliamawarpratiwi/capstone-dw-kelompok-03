@@ -4,7 +4,7 @@ Dihasilkan `python pipeline.py` (`src/gold/nasional.py`) dari tabel nasional Gol
 
 Tabel nasional (periode x seri, rincian total, tampilan lebar): `reports/tabel-nasional.csv`. Tabel nasional lengkap dari hasil ekstraksi (semua rincian, satu baris per periode x seri): `data/gold/nasional_periode_seri.parquet`. Kolom BPS hanya terisi pada tahun survei; itu bentuk datanya, tidak diisi.
 
-Untuk SDG 3.7.2, kelompok umur disamakan lebih dulu: `var1353` berasal dari judul 15–19, WHO memakai `Y15T19` (bukan `Y10T14`), dan WDI `SP.ADO.TFRT` memakai 15–19 dari nama indikator. Satuannya juga sama, per 1.000. Untuk SDG 3.7.1, `var1394` dan WHO `SDGFPALL` (`Y15T49`) sama-sama perempuan 15–49 dan tidak dibatasi pada perempuan menikah saja; yang berbeda adalah penyebut/definisi, bukan kelompok umur.
+Untuk SDG 3.7.2, perbandingan tiga seri memakai `var1353` (BPS, cakupan 15–19, rincian mentah `Tidak ada`), `MDG_0000000003` rincian `Y15T19` (bukan `Y10T14`), dan `SP.ADO.TFRT` (WDI, 15–19 dari nama indikator). Ketiganya menarget perempuan 15–19 dan satuan per 1.000, jadi kelompok umur disamakan lebih dulu sebelum selisih dihitung. Tidak ada tahun yang beririsan untuk ketiganya, jadi selisih tiga seri tidak dihitung dan perbandingan dilakukan berpasangan (P1, P2, P4). Untuk SDG 3.7.1, `var1394` (rincian `Tidak ada`, 15–49 dari judul) dan `SDGFPALL` (`DIM_AGE=Y15T49`, `DIM_SEX=FEMALE`) sama-sama perempuan 15–49, tetapi status perkawinan dan penyebutnya tidak dinyatakan identik; keduanya tidak membatasi pada perempuan menikah saja, dan Limitations WHO mencatat perbedaan base populasi antarsurvei.
 
 ## Pasangan dari panduan kelompok bagian 3
 

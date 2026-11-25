@@ -35,6 +35,12 @@ def _sisip(con, nama, df):
     con.execute(f"INSERT INTO {nama} ({kolom}) SELECT {kolom} FROM {nama}_df")
     return con.execute(f"SELECT count(*) FROM {nama}").fetchall()[0][0]
 
+KOLOM_PANEL = ["indikator", "seri_kode", "rincian", "wilayah_kode", "nama_wilayah", "periode",
+               "jenis_periode", "nilai", "satuan", "status_sel", "penanda", "rujukan_tahun",
+               "_berkas_raw", "_sha256_raw"]
+KOLOM_REK = ["pasangan_id", "jenis", "seri_utama", "rincian_utama", "seri_pembanding", "rincian_pembanding",
+             "periode", "nilai_utama", "nilai_pembanding", "satuan", "selisih", "selisih_relatif",
+             "asal", "kategori", "penjelasan", "catatan"]
 
 def jalankan(silver):
     GOLD.mkdir(parents=True, exist_ok=True)
