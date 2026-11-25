@@ -18,16 +18,19 @@ Dihasilkan `python pipeline.py` dari berkas mentah dan `src/konfigurasi.py`. Tab
 |---|---|---|---|---|---|
 | var1394 | persen | persen | var.unit: 'Persen' | 3.7.1 | 3.7.1 |
 | var1353 | tidak_ada | per_1000_perempuan_seumur | var.unit dan kolom satuan CSV kosong; judul menyebut perempuan 15–19; definisi baku indikator yang sama di metadata WHO ('per 1,000 females in the respective age group') dan nama WDI ('births per 1,000 women ages 15-19'); besaran angka (puluhan) sesuai per 1.000, bukan persen | 3.7.2 | 3.7.2 |
-| SP.ADO.TFRT | — | per_1000_perempuan_seumur | name: '(births per 1,000 women ages 15-19)' | — | 3.7.2 |
-| MDG_0000000003 | — | per_1000_perempuan_seumur | kolom RATE_PER_1000_N; UnitOfMeasure: 'Annual number of births per 1000 adolescent women' | 3.7.2 | 3.7.2 |
-| SDGFPALL | — | persen | kolom RATE_PER_100_N | 3.7.1 | 3.7.1 |
+| SP.ADO.TFRT | — | per_1000_perempuan_seumur | name/sourceNote: '(births per 1,000 women ages 15-19)' | — | 3.7.2 |
+| MDG_0000000003 | — | per_1000_perempuan_seumur | kolom RATE_PER_1000_N; UnitOfMeasure: 'Annual number of births per 1000 adolescent women'; DefinitionText 'per 1,000 females in the respective age group' | 3.7.2 | 3.7.2 |
+| SDGFPALL | — | persen | kolom RATE_PER_100_N; UnitOfMeasure/FullName WHO menyertakan (%) | 3.7.1 | 3.7.1 |
 
 ## Koreksi katalog
 
 | seri_kode | koreksi_katalog |
 |---|---|
-| var1353 | satuan tidak_ada -> per_1000_perempuan_seumur |
-| SP.ADO.TFRT | kode SDG kosong -> 3.7.2 |
+| var1394 | tidak ada (satuan persen dan kode 3.7.1 sesuai katalog) |
+| var1353 | satuan tidak_ada -> per_1000_perempuan_seumur (K-007); nama baku menambahkan satuan per 1.000 (K-003, K-007, K-012) |
+| SP.ADO.TFRT | kode SDG kosong -> 3.7.2 (K-008); satuan kosong -> per_1000_perempuan_seumur (K-007) |
+| MDG_0000000003 | satuan kosong -> per_1000_perempuan_seumur (K-007); nama baku menambahkan satuan per 1.000 (K-029) |
+| SDGFPALL | satuan kosong -> persen (K-029); nama baku menambahkan tanda % (K-029) |
 
 ## Catatan BPS (var.note)
 
