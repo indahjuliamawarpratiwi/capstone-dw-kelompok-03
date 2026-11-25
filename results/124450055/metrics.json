@@ -1,6 +1,7 @@
 {
   "metrik": {
     "pasangan_rekonsiliasi": 2,
+    "selisih_median": 1.937,
     "periode_beririsan": 2,
     "aturan_validasi": 12,
     "aturan_lolos": 12

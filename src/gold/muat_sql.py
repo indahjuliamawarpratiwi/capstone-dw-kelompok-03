@@ -15,7 +15,7 @@ DDL = Path(__file__).with_name("silver.sql")
 GOLD = ROOT / "data" / "gold"
 PANEL = GOLD / "panel_gold.parquet"
 NASIONAL = GOLD / "nasional_periode_seri.parquet"
-REKONSILIASI = GOLD / "pasangan_rekonsiliasi.csv"
+REKONSILIASI = GOLD / "rekonsiliasi.csv"
 KOLOM_PANEL = ["wilayah_kode", "nama_wilayah", "periode", "jenis_periode", "seri_kode",
                "sumber", "rincian", "nilai", "satuan", "sdg_kode"]
 
@@ -43,7 +43,9 @@ def jalankan(silver):
     panel = _panel(silver)
     panel.to_parquet(PANEL, index=False)
     nasional = pd.read_parquet(NASIONAL)
-    rekonsiliasi = pd.read_csv(REKONSILIASI, keep_default_na=False, dtype=str)
+    rekonsiliasi = pd.read_csv(REKONSILIASI, keep_default_na=False)
+    for kolom in ["nilai_utama", "nilai_pembanding", "selisih"]:
+        rekonsiliasi[kolom] = pd.to_numeric(rekonsiliasi[kolom], errors="coerce")
 
     with duckdb.connect(str(DB)) as con:
         con.execute(DDL.read_text(encoding="utf-8"))

@@ -56,6 +56,41 @@ PASANGAN_PANDUAN = [
     ),
 ]
 
+KELOMPOK_UMUR = {
+    ("var1353", "Tidak ada"): "15-19",
+    ("MDG_0000000003", "Y15T19"): "15-19",
+    ("SP.ADO.TFRT", "Y15T19"): "15-19",
+    ("var1394", "Tidak ada"): "15-49",
+    ("SDGFPALL", "Y15T49"): "15-49",
+}
+
+REKONSILIASI_PASANGAN = [
+    dict(id="R1", utama=("var1353", "Tidak ada"), pembanding=("MDG_0000000003", "Y15T19"),
+         kategori="belum terjelaskan",
+         dugaan="Tidak ada tahun yang sama; tahun terdekat tidak dipaksa menjadi pasangan.",
+         bukti="BPS hanya 2012 dan 2017 (TAHUN_TERBIT); WHO Y15T19 tidak memuat kedua tahun itu.",
+         dugaan_kosong="Seri ini tidak tersedia pada periode yang diminta.",
+         bukti_kosong="DIM_TIME WHO tidak kontinu; BPS hanya tahun survei 2012 dan 2017."),
+    dict(id="R2", utama=("var1353", "Tidak ada"), pembanding=("SP.ADO.TFRT", "Y15T19"),
+         kategori="metode berbeda",
+         dugaan="Survei SDKI dengan periode rujukan tertentu vs estimasi model WPP tahunan.",
+         bukti="var.note BPS menyebut SDKI; WDI sourceOrganization = World Population Prospects, UN Population Division.",
+         dugaan_kosong="BPS tidak menerbitkan angka untuk tahun di luar survei.",
+         bukti_kosong="TAHUN_TERBIT BPS = {2012, 2017}; WDI mencakup 65 tahun."),
+    dict(id="R3", utama=("MDG_0000000003", "Y15T19"), pembanding=("SP.ADO.TFRT", "Y15T19"),
+         kategori="vintage berbeda",
+         dugaan="WHO menghimpun survei/registrasi pada vintage berbeda; WDI memakai proyeksi WPP.",
+         bukti="WHO MethodOfEstimationOverview: registrasi sipil/survei; WDI sourceOrganization: WPP.",
+         dugaan_kosong="Salah satu sumber tidak memuat tahun tersebut.",
+         bukti_kosong="DIM_TIME WHO tidak kontinu; WDI tahunan mencakup tahun proyeksi."),
+    dict(id="R4", utama=("var1394", "Tidak ada"), pembanding=("SDGFPALL", "Y15T49"),
+         kategori="definisi berbeda",
+         dugaan="Penyebut berbeda: BPS lebih dekat ke prevalensi kontrasepsi modern; WHO memakai permintaan KB total.",
+         bukti="WHO Denominator = pemakai semua metode + kebutuhan tak terpenuhi; Limitations WHO mencatat perbedaan base/status perkawinan.",
+         dugaan_kosong="SDGFPALL hanya tersedia pada enam tahun.",
+         bukti_kosong="Berkas WHO SDGFPALL memuat 6 baris national Y15T49."),
+]
+
 
 def tabel_nasional(silver):
     nas = silver[silver["wilayah_kode"] == W.INDONESIA].copy()
@@ -107,6 +142,32 @@ def daftar_pasangan():
     return pd.DataFrame(PASANGAN_PANDUAN)
 
 
+def tabel_rekonsiliasi(nasional):
+    baris = []
+    for p in REKONSILIASI_PASANGAN:
+        utama, pembanding = p["utama"], p["pembanding"]
+        if KELOMPOK_UMUR[utama] != KELOMPOK_UMUR[pembanding]:
+            raise AssertionError(f"Kelompok umur tidak sama untuk {p['id']}")
+        a = nasional[(nasional["seri_kode"] == utama[0]) & (nasional["rincian"] == utama[1])]
+        b = nasional[(nasional["seri_kode"] == pembanding[0]) & (nasional["rincian"] == pembanding[1])]
+        nilai_a = dict(zip(a["periode"].astype(str), a["nilai"]))
+        nilai_b = dict(zip(b["periode"].astype(str), b["nilai"]))
+        for periode in sorted(set(nilai_a) | set(nilai_b)):
+            berpasangan = periode in nilai_a and periode in nilai_b
+            va, vb = nilai_a.get(periode), nilai_b.get(periode)
+            baris.append({
+                "pasangan": p["id"], "seri_utama": utama[0], "pembanding": pembanding[0],
+                "rincian_utama": utama[1], "rincian_pembanding": pembanding[1], "periode": periode,
+                "nilai_utama": va, "nilai_pembanding": vb,
+                "selisih": va - vb if berpasangan else None,
+                "status_pasangan": "berpasangan" if berpasangan else "tanpa_pasangan",
+                "kategori": p["kategori"] if berpasangan else "belum terjelaskan",
+                "dugaan": p["dugaan"] if berpasangan else p["dugaan_kosong"],
+                "bukti": p["bukti"] if berpasangan else p["bukti_kosong"],
+            })
+    return pd.DataFrame(baris)
+
+
 def irisan(silver, utama, rinci_utama, pembanding, semester=None):
     def per(seri, rinci):
         s = silver[(silver["seri_kode"] == seri) & (silver["rincian"] == rinci) & (silver["wilayah_kode"] == W.INDONESIA)]
@@ -150,28 +211,53 @@ def jalankan(silver, ekstraksi=None):
         nasional.to_parquet(GOLD / "nasional_periode_seri.parquet", index=False)
         panduan.to_csv(GOLD / "pasangan_rekonsiliasi.csv", index=False)
         catat(baris_nasional_ekstraksi=len(nasional), pasangan_panduan=len(panduan))
+        rek = tabel_rekonsiliasi(nasional)
+        rek.to_csv(GOLD / "rekonsiliasi.csv", index=False)
     else:
         panduan = pd.read_csv(GOLD / "pasangan_rekonsiliasi.csv", keep_default_na=False)
+        rek = pd.read_csv(GOLD / "rekonsiliasi.csv", keep_default_na=False)
+        for kolom in ["nilai_utama", "nilai_pembanding", "selisih"]:
+            rek[kolom] = pd.to_numeric(rek[kolom], errors="coerce")
+
+    berpasangan = rek[rek["status_pasangan"] == "berpasangan"].copy()
+    ringkasan = []
+    for p in REKONSILIASI_PASANGAN:
+        bagian_rek = rek[rek["pasangan"] == p["id"]]
+        pasang = bagian_rek[bagian_rek["status_pasangan"] == "berpasangan"]
+        ringkasan.append({
+            "pasangan": p["id"], "utama": f"{p['utama'][0]} [{p['utama'][1]}]",
+            "pembanding": f"{p['pembanding'][0]} [{p['pembanding'][1]}]",
+            "kategori": p["kategori"], "baris_berpasangan": len(pasang),
+            "baris_tanpa_pasangan": int((bagian_rek["status_pasangan"] == "tanpa_pasangan").sum()),
+            "selisih_median": round(float(pasang["selisih"].median()), 2) if len(pasang) else None,
+        })
+    ringkasan = pd.DataFrame(ringkasan)
 
     tulis("pasangan-rekonsiliasi.md", "\n\n".join([
         "# Tabel nasional dan pasangan rekonsiliasi",
-        "Dihasilkan `python pipeline.py` (`src/gold/nasional.py`) dari Silver dan `src/konfigurasi.py`. Selisih dihitung "
-        "di Sprint 2; Sprint 1 memastikan setiap pasangan memang sebanding dan mencatat tahun yang beririsan.",
+        "Dihasilkan `python pipeline.py` (`src/gold/nasional.py`) dari tabel nasional Gold dan `src/konfigurasi.py`. "
+        "Selisih dihitung di Tahap 6 Sprint 2 dan tidak dihapus atau dipaksa sama.",
         "Tabel nasional (periode x seri, rincian total, tampilan lebar): `reports/tabel-nasional.csv`. "
         "Tabel nasional lengkap dari hasil ekstraksi (semua rincian, satu baris per periode x seri): "
         "`data/gold/nasional_periode_seri.parquet`. Kolom BPS hanya terisi pada tahun survei; itu bentuk datanya, tidak diisi.",
-        "Untuk SDG 3.7.2, perbandingan tiga seri memakai `var1353` (BPS, cakupan 15–19, rincian mentah `Tidak ada`), "
-        "`MDG_0000000003` rincian `Y15T19` (bukan `Y10T14`), dan `SP.ADO.TFRT` (WDI, 15–19 dari nama indikator). "
-        "Ketiganya menarget perempuan 15–19 dan satuan per 1.000, jadi kelompok umur disamakan lebih dulu sebelum selisih "
-        "dihitung. Tidak ada tahun yang beririsan untuk ketiganya, jadi selisih tiga seri tidak dihitung dan perbandingan "
-        "dilakukan berpasangan (P1, P2, P4). Untuk SDG 3.7.1, `var1394` (rincian `Tidak ada`, 15–49 dari judul) dan "
-        "`SDGFPALL` (`DIM_AGE=Y15T49`, `DIM_SEX=FEMALE`) sama-sama perempuan 15–49, tetapi status perkawinan dan "
-        "penyebutnya tidak dinyatakan identik; keduanya tidak membatasi pada perempuan menikah saja, dan Limitations WHO "
-        "mencatat perbedaan base populasi antarsurvei.",
+        "Untuk SDG 3.7.2, kelompok umur disamakan lebih dulu: `var1353` berasal dari judul 15–19, WHO memakai "
+        "`Y15T19` (bukan `Y10T14`), dan WDI `SP.ADO.TFRT` memakai 15–19 dari nama indikator. Satuannya juga sama, "
+        "per 1.000. Untuk SDG 3.7.1, `var1394` dan WHO `SDGFPALL` (`Y15T49`) sama-sama perempuan 15–49 dan tidak "
+        "dibatasi pada perempuan menikah saja; yang berbeda adalah penyebut/definisi, bukan kelompok umur.",
         "## Pasangan dari panduan kelompok bagian 3",
         tabel_md(panduan[["pasangan", "rincian_dipakai", "kelompok_umur", "status_perkawinan_populasi",
                           "periode_beririsan_berpasangan", "dapat_dibandingkan_langsung", "alasan_keterbandingan"]]),
         "## Ringkasan pasangan", tabel_md(daftar),
-        "## Rincian per pasangan", *bagian,
+        "## Tabel rekonsiliasi Tahap 6",
+        "Setiap baris berpasangan memuat periode, nilai kedua seri, selisih, dan kategori penjelasan. "
+        "Periode tanpa pasangan tetap tampil dengan nilai kosong dan kategori `belum terjelasan` lengkap dengan dugaan serta bukti.",
+        tabel_md(ringkasan),
+        "### Baris berpasangan",
+        tabel_md(berpasangan[["pasangan", "seri_utama", "pembanding", "periode", "nilai_utama",
+                              "nilai_pembanding", "selisih", "kategori", "dugaan", "bukti"]]),
+        "### Periode tanpa pasangan",
+        f"{len(rek) - len(berpasangan)} baris tersimpan di `data/gold/rekonsiliasi.csv` tanpa selisih.",
+        tabel_md(rek[rek["status_pasangan"] == "tanpa_pasangan"].groupby("pasangan").size().rename("baris").reset_index()),
+        "## Rincian alasan pasangan lama", *bagian,
     ]))
-    return {"nasional": nas, "pasangan": daftar, "pasangan_panduan": panduan}
+    return {"nasional": nas, "pasangan": daftar, "pasangan_panduan": panduan, "rekonsiliasi": rek}
