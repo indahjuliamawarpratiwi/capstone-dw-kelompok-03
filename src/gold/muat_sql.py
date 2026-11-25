@@ -27,6 +27,8 @@ KOLOM_REK = ["pasangan_id", "jenis", "seri_utama", "rincian_utama", "seri_pemban
              "periode", "nilai_utama", "nilai_pembanding", "satuan", "selisih", "selisih_relatif",
              "asal", "kategori", "penjelasan", "catatan"]
 
+def jalankan(silver):
+    GOLD.mkdir(parents=True, exist_ok=True)
 
 def _q(con, sql, param=None):
     return con.execute(sql, param or []).fetchall()
@@ -99,6 +101,29 @@ def jalankan(silver=None, gold=None):
     seri["sdg_kode"] = seri["sdg_kode"].astype(str)
     s = silver.copy()
     s["rujukan_tahun"] = s["rujukan_tahun"].astype("float64")
+    panel = _panel(silver)
+    panel.to_parquet(PANEL, index=False)
+    nasional = pd.read_parquet(NASIONAL)
+    rekonsiliasi = pd.read_csv(REKONSILIASI, keep_default_na=False, dtype=str)
+
+    with duckdb.connect(str(DB)) as con:
+        con.execute(DDL.read_text(encoding="utf-8"))
+        jumlah = {
+            "seri": _sisip(con, "seri", seri),
+            "silver": _sisip(con, "silver", s),
+            "panel_gold": _sisip(con, "panel_gold", panel),
+            "nasional": _sisip(con, "nasional", nasional),
+            "rekonsiliasi": _sisip(con, "rekonsiliasi", rekonsiliasi),
+        }
+
+    for nama, sumber in [("silver", len(silver)), ("panel_gold", len(panel)),
+                         ("nasional", len(nasional)), ("rekonsiliasi", len(rekonsiliasi))]:
+        if jumlah[nama] != sumber:
+            raise AssertionError(f"DuckDB {nama}: {jumlah[nama]} baris, sumber {sumber} baris")
+
+    catat(baris_sql=jumlah["silver"])
+    return {"baris_sql": jumlah["silver"], "baris_sql_panel": jumlah["panel_gold"],
+            "baris_sql_nasional": jumlah["nasional"], "baris_sql_rekonsiliasi": jumlah["rekonsiliasi"]}
     p = gold["panel"].copy()
     if "indikator" not in p.columns:
         p["indikator"] = p["seri_kode"]

@@ -10,6 +10,17 @@ Fokus kasus tetap pada pembedaan hal yang tampak “sama”: `var1353` hanya umu
 
 ## 2. Data dan lineage
 
+Respons JSON mentah tetap disimpan apa adanya di `data/raw/` sebagai lapis Bronze/arsip lineage, bukan
+dimuat sebagai dokumen ke dalam basis data. Untuk Silver dan Gold dipakai **DuckDB** (`data/gold/gudang.duckdb`,
+dibuat ulang oleh `python pipeline.py`, tidak di-commit): DDL ada di `src/gold/silver.sql` dengan empat tabel
+ber-kunci primer jelas — `silver` (235 baris), `panel_gold` (134), `nasional` (101), dan `rekonsiliasi` (2).
+DuckDB dipilih karena skema lapis ini stabil, kunci komposit serta CHECK dapat dipaksakan, dan tabel dapat
+di-query/join/agregasi langsung dari Parquet tanpa server; JSON dokumen lebih fleksibel untuk variasi field
+sumber tetapi nested/heterogen, sulit divalidasi dan lambat untuk query analitik. Dengan demikian JSON cocok
+pada Bronze untuk keterlacakan, sedangkan tabel SQL cocok pada Silver (konsistensi) dan Gold (panel,
+agregasi nasional, serta pasangan rekonsiliasi).
+
+## Masalah data dan penanganannya
 Paket mentah terdiri dari **13 berkas** snapshot 17–20 Oktober 2026 (BPS 2 CSV + 2 JSON + 1 manifest asal; WDI 1 data + 3 metadata; WHO GHO 2 CSV + 2 metadata). `ekstraksi.jalankan()` membaca seluruh berkas manifest dengan `_berkas_raw` dan `_sha256_raw` dari `src.common.manifest.sha256_raw`;lympi **0 berkas terlewat** dan **0 SHA256 tidak cocok**. Silver memuat 374 baris data observasi terpilih dari 5 seri.
 
 Bukti: `reports/ekstraksi.md`, `src/ekstraksi/`, `src/common/manifest.py`, `log-keputusan.csv` K-002, K-013, K-018.
