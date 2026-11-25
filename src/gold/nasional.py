@@ -1,18 +1,14 @@
 """Persiapan tahap 6 — tabel nasional semua seri dan daftar pasangan rekonsiliasi.
 
 Sprint 1 belum menghitung selisih. Yang disiapkan: tabel periode x seri (tampilan lebar) untuk baris
-Indonesia, dan untuk setiap pasangan dari panduan kelompok: rincian yang dipakai, tahun yang beririsan,
-pertanyaan keterbandingan, jawabannya beserta bukti, dan dugaan kategori selisih.
+Indonesia, tabel nasional dari hasil ekstraksi, dan pasangan dari panduan kelompok bagian 3 beserta
+rincian yang benar-benar dipakai dan alasan keterbandingannya.
 """
 import pandas as pd
 
 from src import konfigurasi as K
 from src import wilayah as W
 from src.laporan import ROOT, catat, tabel_md, tulis
-
-SERI_UTAMA = {"var1394", "var1353"}
-RINCIAN_NASIONAL = {"MDG_0000000003": "umur=15-19"}
-LABEL_SUMBER = {"bps": "BPS", "wdi": "WDI", "who_gho": "WHO GHO"}
 
 
 def tabel_nasional(silver):
@@ -21,48 +17,6 @@ def tabel_nasional(silver):
     total = nas[nas["rincian"] == "total"]
     lebar = total.pivot_table(index="periode", columns="kolom", values="nilai").sort_index()
     return nas, lebar
-
-
-def tabel_nasional_panjang(nas):
-    """Tabel Gold: satu baris per periode x seri, termasuk asal angka nasional.
-
-    BPS menerbitkan baris Indonesia (kode 9999), jadi seri utama tidak perlu diagregasi dari provinsi.
-    MDG_0000000003 memakai rincian umur=15-19 agar sebanding dengan BPS/WDI; rincian 10-14 tidak dipakai.
-    """
-    potong = []
-    for seri in K.SERI:
-        rinci = RINCIAN_NASIONAL.get(seri, "total")
-        d = nas[(nas["seri_kode"] == seri) & (nas["rincian"] == rinci)].copy()
-        if d.empty:
-            continue
-        d["rincian_dipakai"] = rinci
-        potong.append(d)
-    if not potong:
-        return pd.DataFrame()
-
-    out = pd.concat(potong, ignore_index=True)
-    out["kelompok"] = out["seri_kode"].map(lambda s: "utama" if s in SERI_UTAMA else "pembanding")
-    out["tingkat"] = "nasional"
-    out["asal_angka"] = [
-        f"baris Indonesia ({LABEL_SUMBER.get(s, s)})" if s == "bps"
-        else f"pembanding nasional ({LABEL_SUMBER.get(s, s)})"
-        for s in out["sumber"]
-    ]
-    out["aturan_agregat"] = out["sumber"].map(
-        lambda s: "tidak diagregasi; BPS menerbitkan baris Indonesia (9999)" if s == "bps"
-        else "tidak berlaku; seri pembanding sudah nasional"
-    )
-    out["catatan_rincian"] = out["seri_kode"].map(
-        lambda s: "rincian total" if s not in RINCIAN_NASIONAL
-        else f"rincian {RINCIAN_NASIONAL[s]} dipakai; rincian 10-14 tidak sebanding"
-    )
-    kembar = out[out.duplicated(["periode", "seri_kode"], keep=False)]
-    if not kembar.empty:
-        raise ValueError(f"tabel nasional tidak unik per periode x seri: {kembar[['periode', 'seri_kode']].to_dict('records')}")
-    kolom = ["periode", "seri_kode", "sumber", "kelompok", "tingkat", "wilayah_kode", "nama_wilayah",
-             "rincian", "rincian_dipakai", "nilai", "satuan", "sdg_kode", "asal_angka", "aturan_agregat",
-             "catatan_rincian", "_berkas_raw", "_sha256_raw"]
-    return out[kolom].sort_values(["periode", "seri_kode"], kind="stable").reset_index(drop=True)
 
 
 def irisan(silver, utama, rinci_utama, pembanding, semester=None):
@@ -77,7 +31,7 @@ def irisan(silver, utama, rinci_utama, pembanding, semester=None):
     return sorted(set.intersection(a, *[per(s, r) for s, r in pembanding])) if pembanding else []
 
 
-def jalankan(silver):
+def jalankan(silver, ekstraksi=None):
     nas, lebar = tabel_nasional(silver)
     (ROOT / "reports").mkdir(exist_ok=True)
     lebar.to_csv(ROOT / "reports" / "tabel-nasional.csv")
@@ -132,14 +86,36 @@ def jalankan(silver):
     catat(pasangan_rekonsiliasi=n_selisih, pasangan_konteks=int((daftar["jenis"] != "selisih").sum()),
           periode_beririsan=int(daftar.loc[daftar["jenis"] == "selisih", "periode_beririsan"].sum()),
           **{f"irisan_{r.id.lower()}": r.periode_beririsan for r in daftar.itertuples()})
+
+    panduan = daftar_pasangan()
+    if ekstraksi:
+        GOLD.mkdir(parents=True, exist_ok=True)
+        nasional = tabel_nasional_ekstraksi(ekstraksi)
+        nasional.to_parquet(GOLD / "nasional_periode_seri.parquet", index=False)
+        panduan.to_csv(GOLD / "pasangan_rekonsiliasi.csv", index=False)
+        catat(baris_nasional_ekstraksi=len(nasional), pasangan_panduan=len(panduan))
+    else:
+        panduan = pd.read_csv(GOLD / "pasangan_rekonsiliasi.csv", keep_default_na=False)
+
     tulis("pasangan-rekonsiliasi.md", "\n\n".join([
         "# Tabel nasional dan pasangan rekonsiliasi",
         "Dihasilkan `python pipeline.py` (`src/gold/nasional.py`) dari Silver dan `src/konfigurasi.py`. Selisih dihitung "
         "di Sprint 2; Sprint 1 memastikan setiap pasangan memang sebanding dan mencatat tahun yang beririsan.",
         "Tabel nasional (periode x seri, rincian total, tampilan lebar): `reports/tabel-nasional.csv`. "
-        "Kolom BPS hanya terisi pada tahun survei; itu bentuk datanya, tidak diisi.",
+        "Tabel nasional lengkap dari hasil ekstraksi (semua rincian, satu baris per periode x seri): "
+        "`data/gold/nasional_periode_seri.parquet`. Kolom BPS hanya terisi pada tahun survei; itu bentuk datanya, tidak diisi.",
+        "Untuk SDG 3.7.2, perbandingan tiga seri memakai `var1353` (BPS, cakupan 15–19, rincian mentah `Tidak ada`), "
+        "`MDG_0000000003` rincian `Y15T19` (bukan `Y10T14`), dan `SP.ADO.TFRT` (WDI, 15–19 dari nama indikator). "
+        "Ketiganya menarget perempuan 15–19 dan satuan per 1.000, jadi kelompok umur disamakan lebih dulu sebelum selisih "
+        "dihitung. Tidak ada tahun yang beririsan untuk ketiganya, jadi selisih tiga seri tidak dihitung dan perbandingan "
+        "dilakukan berpasangan (P1, P2, P4). Untuk SDG 3.7.1, `var1394` (rincian `Tidak ada`, 15–49 dari judul) dan "
+        "`SDGFPALL` (`DIM_AGE=Y15T49`, `DIM_SEX=FEMALE`) sama-sama perempuan 15–49, tetapi status perkawinan dan "
+        "penyebutnya tidak dinyatakan identik; keduanya tidak membatasi pada perempuan menikah saja, dan Limitations WHO "
+        "mencatat perbedaan base populasi antarsurvei.",
+        "## Pasangan dari panduan kelompok bagian 3",
+        tabel_md(panduan[["pasangan", "rincian_dipakai", "kelompok_umur", "status_perkawinan_populasi",
+                          "periode_beririsan_berpasangan", "dapat_dibandingkan_langsung", "alasan_keterbandingan"]]),
         "## Ringkasan pasangan", tabel_md(daftar),
         "## Rincian per pasangan", *bagian,
     ]))
-    return {"nasional": nas, "nasional_panjang": panjang, "pasangan": daftar,
-            "tabel_nasional_gold": str(gold / "tabel-nasional.csv")}
+    return {"nasional": nas, "pasangan": daftar}
