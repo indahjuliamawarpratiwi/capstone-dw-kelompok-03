@@ -24,6 +24,9 @@ KOLOM_PANEL = ["wilayah_kode", "nama_wilayah", "periode", "jenis_periode", "seri
                "sumber", "rincian", "nilai", "satuan", "sdg_kode"]
 
 
+<<<<<<< HEAD
+def jalankan(silver, ekstraksi=None):
+=======
 def _panel(silver):
     p = silver.loc[silver["wilayah_kode"] != 9999, KOLOM_PANEL].copy()
     return p.sort_values(["wilayah_kode", "periode", "seri_kode", "rincian"]).reset_index(drop=True)
@@ -109,6 +112,7 @@ def jalankan(silver=None, gold=None):
             "rekonsiliasi": pd.read_parquet(GOLD / "rekonsiliasi.parquet"),
         }
     nasional = gold.get("nasional", gold.get("nasional_gold"))
+>>>>>>> origin/main
     DB.parent.mkdir(parents=True, exist_ok=True)
     DB.unlink(missing_ok=True)
 
