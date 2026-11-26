@@ -14,7 +14,7 @@ DB = ROOT / "data" / "gold" / "gudang.duckdb"
 DDL = Path(__file__).with_name("silver.sql")
 
 
-def jalankan(silver):
+def jalankan(silver, ekstraksi=None):
     DB.parent.mkdir(parents=True, exist_ok=True)
     DB.unlink(missing_ok=True)
     seri = pd.read_csv(ROOT / "docs" / "seri.csv")[["seri_kode", "sumber", "tingkat", "nama_baku", "satuan", "sdg_kode"]]

@@ -31,7 +31,7 @@ def irisan(silver, utama, rinci_utama, pembanding, semester=None):
     return sorted(set.intersection(a, *[per(s, r) for s, r in pembanding])) if pembanding else []
 
 
-def jalankan(silver):
+def jalankan(silver, ekstraksi=None):
     nas, lebar = tabel_nasional(silver)
     (ROOT / "reports").mkdir(exist_ok=True)
     lebar.to_csv(ROOT / "reports" / "tabel-nasional.csv")
