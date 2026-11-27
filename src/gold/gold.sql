@@ -1,6 +1,3 @@
--- Skema SQL Gold (DuckDB), dimuat sesudah silver.sql oleh src/gold/muat_sql.py.
--- Kunci primer menolak sel ganda; CHECK menolak status dan kategori di luar daftar baku.
-
 CREATE TABLE gold_panel (
     indikator       VARCHAR  NOT NULL,
     seri_kode       VARCHAR  NOT NULL REFERENCES seri (seri_kode),
@@ -60,6 +57,7 @@ CREATE TABLE rekonsiliasi (
     PRIMARY KEY (pasangan_id, seri_pembanding, rincian_pembanding, periode)
 );
 
+-- Pembanding: berkas JSON mentah disimpan apa adanya sebagai dokumen (satu baris per berkas).
 CREATE TABLE dokumen_mentah (
     _berkas_raw     VARCHAR PRIMARY KEY,
     _sha256_raw     VARCHAR NOT NULL,
