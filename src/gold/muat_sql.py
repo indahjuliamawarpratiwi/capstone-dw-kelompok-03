@@ -17,27 +17,16 @@ from src.laporan import ROOT, catat, tabel_md, tulis
 
 DB = ROOT / "data" / "gold" / "gudang.duckdb"
 GOLD = ROOT / "data" / "gold"
-PANEL = GOLD / "panel_gold.parquet"
-NASIONAL = GOLD / "nasional_periode_seri.parquet"
-REKONSILIASI = GOLD / "pasangan_rekonsiliasi.csv"
-KOLOM_PANEL = ["wilayah_kode", "nama_wilayah", "periode", "jenis_periode", "seri_kode",
-               "sumber", "rincian", "nilai", "satuan", "sdg_kode"]
+DDL = [Path(__file__).with_name("silver.sql"), Path(__file__).with_name("gold.sql")]
+RAW = ROOT / "data" / "raw"
 
+KOLOM_PANEL = ["indikator", "seri_kode", "rincian", "wilayah_kode", "nama_wilayah", "periode",
+               "jenis_periode", "nilai", "satuan", "status_sel", "penanda", "rujukan_tahun",
+               "_berkas_raw", "_sha256_raw"]
+KOLOM_REK = ["pasangan_id", "jenis", "seri_utama", "rincian_utama", "seri_pembanding", "rincian_pembanding",
+             "periode", "nilai_utama", "nilai_pembanding", "satuan", "selisih", "selisih_relatif",
+             "asal", "kategori", "penjelasan", "catatan"]
 
-def _panel(silver):
-    p = silver.loc[silver["wilayah_kode"] != 9999, KOLOM_PANEL].copy()
-    return p.sort_values(["wilayah_kode", "periode", "seri_kode", "rincian"]).reset_index(drop=True)
-
-
-def _sisip(con, nama, df):
-    kolom = ", ".join(df.columns)
-    con.register(f"{nama}_df", df)
-    con.execute(f"INSERT INTO {nama} ({kolom}) SELECT {kolom} FROM {nama}_df")
-    return con.execute(f"SELECT count(*) FROM {nama}").fetchall()[0][0]
-
-
-def jalankan(silver):
-    GOLD.mkdir(parents=True, exist_ok=True)
 
 def _q(con, sql, param=None):
     return con.execute(sql, param or []).fetchall()
@@ -102,7 +91,7 @@ def jalankan(silver=None, gold=None):
             "nasional": pd.read_parquet(GOLD / "nasional.parquet"),
             "rekonsiliasi": pd.read_parquet(GOLD / "rekonsiliasi.parquet"),
         }
-    nasional = gold.get("nasional", gold.get("nasional_gold"))
+    nasional = gold.get("nasional_gold", gold.get("nasional"))
     DB.parent.mkdir(parents=True, exist_ok=True)
     DB.unlink(missing_ok=True)
 
@@ -110,31 +99,6 @@ def jalankan(silver=None, gold=None):
     seri["sdg_kode"] = seri["sdg_kode"].astype(str)
     s = silver.copy()
     s["rujukan_tahun"] = s["rujukan_tahun"].astype("float64")
-    panel = _panel(silver)
-    panel.to_parquet(PANEL, index=False)
-    nasional = pd.read_parquet(NASIONAL)
-    rekonsiliasi = pd.read_csv(REKONSILIASI, keep_default_na=False)
-    for kolom in ["nilai_utama", "nilai_pembanding", "selisih"]:
-        rekonsiliasi[kolom] = pd.to_numeric(rekonsiliasi[kolom], errors="coerce")
-
-    with duckdb.connect(str(DB)) as con:
-        con.execute(DDL.read_text(encoding="utf-8"))
-        jumlah = {
-            "seri": _sisip(con, "seri", seri),
-            "silver": _sisip(con, "silver", s),
-            "panel_gold": _sisip(con, "panel_gold", panel),
-            "nasional": _sisip(con, "nasional", nasional),
-            "rekonsiliasi": _sisip(con, "rekonsiliasi", rekonsiliasi),
-        }
-
-    for nama, sumber in [("silver", len(silver)), ("panel_gold", len(panel)),
-                         ("nasional", len(nasional)), ("rekonsiliasi", len(rekonsiliasi))]:
-        if jumlah[nama] != sumber:
-            raise AssertionError(f"DuckDB {nama}: {jumlah[nama]} baris, sumber {sumber} baris")
-
-    catat(baris_sql=jumlah["silver"])
-    return {"baris_sql": jumlah["silver"], "baris_sql_panel": jumlah["panel_gold"],
-            "baris_sql_nasional": jumlah["nasional"], "baris_sql_rekonsiliasi": jumlah["rekonsiliasi"]}
     p = gold["panel"].copy()
     if "indikator" not in p.columns:
         p["indikator"] = p["seri_kode"]
