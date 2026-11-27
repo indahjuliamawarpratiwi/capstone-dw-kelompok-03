@@ -1,4 +1,6 @@
 -- Skema SQL Silver (DuckDB). Dimuat oleh src/gold/muat_sql.py.
+-- Kunci primer = kunci unik skema minimal. Basis data menjadi lapis validasi terakhir:
+-- baris yang melanggar kunci, rentang batas, atau rujukan seri ditolak saat dimuat.
 -- Kunci primer = kunci unik tiap lapis. Constraint menolak baris yang tidak konsisten saat dimuat.
 
 CREATE TABLE seri (

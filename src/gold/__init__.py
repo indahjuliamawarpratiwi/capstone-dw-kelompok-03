@@ -4,6 +4,11 @@ Panel provinsi x periode x indikator, tabel nasional, rekonsiliasi, dan pemuatan
 """
 from src.gold import muat_sql, panel, rekonsiliasi
 
+def jalankan(silver):
+    hasil = nasional.jalankan(silver)
+    hasil.update(panel.jalankan(silver))
+    hasil.update(rekonsiliasi.jalankan(hasil["nasional_gold"]))
+    hasil["baris_sql"] = muat_sql.jalankan(silver, hasil)
 
 def jalankan(silver, ekstraksi=None):
     hasil_panel = panel.jalankan(silver)

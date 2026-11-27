@@ -1,11 +1,28 @@
 {
   "metrik": {
+    "pasangan_rekonsiliasi": 4,
+    "pasangan_konteks": 0,
+    "periode_beririsan": 18,
+    "selisih_dihitung": 20,
+    "selisih_median": 8.68,
+    "selisih_median_semua": 5.61,
+    "baris_rekonsiliasi": 28,
+    "baris_tanpa_pasangan": 8,
+    "kategori_dipakai": 3,
+    "aturan_validasi": 22,
+    "aturan_lolos": 22,
+    "tabel_sql": 5,
+    "baris_sql": 235,
+    "baris_sql_gold": 269,
+    "baris_panel_gold": 152,
+    "baris_nasional_gold": 89,
+    "dokumen_json": 9
     "pasangan_rekonsiliasi": 2,
     "periode_beririsan": 2,
     "aturan_validasi": 12,
     "aturan_lolos": 12
   },
   "seed": 0,
-  "data_hash": "5b38cf44085ab091ed026ebe94710c90a1c1f4ff25f2f039d9ee77e32306af4b",
+  "data_hash": "65d843138bf94478bde504634556ba0ca67a95e7f6e9810f99c45a2591fd6c63",
   "perangkat": "Windows AMD64 Python 3.14.5"
 }

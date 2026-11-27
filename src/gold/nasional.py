@@ -1,14 +1,15 @@
 """Persiapan tahap 6 — tabel nasional semua seri dan daftar pasangan rekonsiliasi.
 
 Sprint 1 belum menghitung selisih. Yang disiapkan: tabel periode x seri (tampilan lebar) untuk baris
-Indonesia, tabel nasional dari hasil ekstraksi, dan pasangan dari panduan kelompok bagian 3 beserta
-rincian yang benar-benar dipakai dan alasan keterbandingannya.
+Indonesia, dan untuk setiap pasangan dari panduan kelompok: rincian yang dipakai, tahun yang beririsan,
+pertanyaan keterbandingan, jawabannya beserta bukti, dan dugaan kategori selisih.
 """
 import pandas as pd
 
 from src import konfigurasi as K
 from src import wilayah as W
 from src.laporan import ROOT, catat, tabel_md, tulis
+
 
 SERI_UTAMA = {"var1394", "var1353"}
 RINCIAN_NASIONAL = {"MDG_0000000003": "umur=15-19"}
@@ -223,11 +224,8 @@ def irisan(silver, utama, rinci_utama, pembanding, semester=None):
     return sorted(set.intersection(a, *[per(s, r) for s, r in pembanding])) if pembanding else []
 
 
-def jalankan(silver, ekstraksi=None):
+def jalankan(silver):
     nas, lebar = tabel_nasional(silver)
-    (ROOT / "reports").mkdir(exist_ok=True)
-    lebar.to_csv(ROOT / "reports" / "tabel-nasional.csv")
-
     panjang = tabel_nasional_panjang(nas)
     gold = ROOT / "data" / "gold"
     gold.mkdir(parents=True, exist_ok=True)
@@ -259,6 +257,8 @@ def jalankan(silver, ekstraksi=None):
         tabel_md(panjang[["periode", "seri_kode", "kelompok", "rincian", "nilai", "satuan", "asal_angka"]].head(12)),
     ]))
 
+    (ROOT / "reports").mkdir(exist_ok=True)
+    lebar.to_csv(ROOT / "reports" / "tabel-nasional.csv")
     baris, bagian = [], []
     for p in K.PASANGAN:
         utama = p["utama"].split(",")[0].strip()
@@ -278,62 +278,15 @@ def jalankan(silver, ekstraksi=None):
     catat(pasangan_rekonsiliasi=n_selisih, pasangan_konteks=int((daftar["jenis"] != "selisih").sum()),
           periode_beririsan=int(daftar.loc[daftar["jenis"] == "selisih", "periode_beririsan"].sum()),
           **{f"irisan_{r.id.lower()}": r.periode_beririsan for r in daftar.itertuples()})
-
-    panduan = daftar_pasangan()
-    if ekstraksi:
-        GOLD.mkdir(parents=True, exist_ok=True)
-        nasional = tabel_nasional_ekstraksi(ekstraksi)
-        nasional.to_parquet(GOLD / "nasional_periode_seri.parquet", index=False)
-        panduan.to_csv(GOLD / "pasangan_rekonsiliasi.csv", index=False)
-        catat(baris_nasional_ekstraksi=len(nasional), pasangan_panduan=len(panduan))
-        rek = tabel_rekonsiliasi(nasional)
-        rek.to_csv(GOLD / "rekonsiliasi.csv", index=False)
-    else:
-        panduan = pd.read_csv(GOLD / "pasangan_rekonsiliasi.csv", keep_default_na=False)
-        rek = pd.read_csv(GOLD / "rekonsiliasi.csv", keep_default_na=False)
-        for kolom in ["nilai_utama", "nilai_pembanding", "selisih"]:
-            rek[kolom] = pd.to_numeric(rek[kolom], errors="coerce")
-
-    berpasangan = rek[rek["status_pasangan"] == "berpasangan"].copy()
-    ringkasan = []
-    for p in REKONSILIASI_PASANGAN:
-        bagian_rek = rek[rek["pasangan"] == p["id"]]
-        pasang = bagian_rek[bagian_rek["status_pasangan"] == "berpasangan"]
-        ringkasan.append({
-            "pasangan": p["id"], "utama": f"{p['utama'][0]} [{p['utama'][1]}]",
-            "pembanding": f"{p['pembanding'][0]} [{p['pembanding'][1]}]",
-            "kategori": p["kategori"], "baris_berpasangan": len(pasang),
-            "baris_tanpa_pasangan": int((bagian_rek["status_pasangan"] == "tanpa_pasangan").sum()),
-            "selisih_median": round(float(pasang["selisih"].median()), 2) if len(pasang) else None,
-        })
-    ringkasan = pd.DataFrame(ringkasan)
-
     tulis("pasangan-rekonsiliasi.md", "\n\n".join([
         "# Tabel nasional dan pasangan rekonsiliasi",
-        "Dihasilkan `python pipeline.py` (`src/gold/nasional.py`) dari tabel nasional Gold dan `src/konfigurasi.py`. "
-        "Selisih dihitung di Tahap 6 Sprint 2 dan tidak dihapus atau dipaksa sama.",
+        "Dihasilkan `python pipeline.py` (`src/gold/nasional.py`) dari Silver dan `src/konfigurasi.py`. Selisih dihitung "
+        "di Sprint 2; Sprint 1 memastikan setiap pasangan memang sebanding dan mencatat tahun yang beririsan.",
         "Tabel nasional (periode x seri, rincian total, tampilan lebar): `reports/tabel-nasional.csv`. "
-        "Tabel nasional lengkap dari hasil ekstraksi (semua rincian, satu baris per periode x seri): "
-        "`data/gold/nasional_periode_seri.parquet`. Kolom BPS hanya terisi pada tahun survei; itu bentuk datanya, tidak diisi.",
-        "Untuk SDG 3.7.2, kelompok umur disamakan lebih dulu: `var1353` berasal dari judul 15–19, WHO memakai "
-        "`Y15T19` (bukan `Y10T14`), dan WDI `SP.ADO.TFRT` memakai 15–19 dari nama indikator. Satuannya juga sama, "
-        "per 1.000. Untuk SDG 3.7.1, `var1394` dan WHO `SDGFPALL` (`Y15T49`) sama-sama perempuan 15–49 dan tidak "
-        "dibatasi pada perempuan menikah saja; yang berbeda adalah penyebut/definisi, bukan kelompok umur.",
-        "## Pasangan dari panduan kelompok bagian 3",
-        tabel_md(panduan[["pasangan", "rincian_dipakai", "kelompok_umur", "status_perkawinan_populasi",
-                          "periode_beririsan_berpasangan", "dapat_dibandingkan_langsung", "alasan_keterbandingan"]]),
+        "Kolom BPS hanya terisi pada tahun survei; itu bentuk datanya, tidak diisi.",
         "## Ringkasan pasangan", tabel_md(daftar),
-        "## Tabel rekonsiliasi Tahap 6",
-        "Setiap baris berpasangan memuat periode, nilai kedua seri, selisih, dan kategori penjelasan. "
-        "Periode tanpa pasangan tetap tampil dengan nilai kosong dan kategori `belum terjelasan` lengkap dengan dugaan serta bukti.",
-        tabel_md(ringkasan),
-        "### Baris berpasangan",
-        tabel_md(berpasangan[["pasangan", "seri_utama", "pembanding", "periode", "nilai_utama",
-                              "nilai_pembanding", "selisih", "kategori", "dugaan", "bukti"]]),
-        "### Periode tanpa pasangan",
-        f"{len(rek) - len(berpasangan)} baris tersimpan di `data/gold/rekonsiliasi.csv` tanpa selisih.",
-        tabel_md(rek[rek["status_pasangan"] == "tanpa_pasangan"].groupby("pasangan").size().rename("baris").reset_index()),
-        "## Rincian alasan pasangan lama", *bagian,
+        "## Rincian per pasangan", *bagian,
     ]))
+    return {"nasional": nas, "pasangan": daftar}
     return {"nasional": nas, "nasional_panjang": panjang, "pasangan": daftar,
             "pasangan_panduan": panduan, "tabel_nasional_gold": str(gold / "tabel-nasional.csv")}
