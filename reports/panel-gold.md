@@ -10,7 +10,7 @@ Dihasilkan `python pipeline.py` (`src/gold/panel.py`). Satu sel = satu seri x pr
 
 - Satu nilai per sel; duplikat kunci tidak diizinkan.
 
-- Tabel nasional memuat rincian yang dipakai `PASANGAN` dari BPS, WHO, dan WDI; rincian umur `10-14` tetap hanya di Silver (K-041).
+- Tabel nasional memuat rincian yang dipakai `PASANGAN` dari BPS, WHO, dan WDI dengan kolom `asal`; rincian umur `10-14` tetap hanya di Silver.
 
 - Penanda Sprint 1 dibawa apa adanya; nilai anomali tidak diubah.
 

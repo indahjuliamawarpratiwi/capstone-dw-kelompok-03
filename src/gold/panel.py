@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from src import konfigurasi as K
 from src import wilayah as W
 from src.gold import nasional_gold
 from src.laporan import ROOT, catat, tabel_md, tulis
@@ -45,6 +46,10 @@ def bentuk_panel(silver):
     panel["jenis_periode"] = "tahun"
     panel["rincian"] = "total"
     panel["sumber"] = panel["sumber"].fillna("bps")
+    peta_satuan = {k: v["satuan"] for k, v in K.SERI.items()}
+    peta_sdg = {k: v.get("sdg", "") for k, v in K.SERI.items()}
+    panel["satuan"] = panel["satuan"].fillna(panel["seri_kode"].map(peta_satuan))
+    panel["sdg_kode"] = panel["sdg_kode"].fillna(panel["seri_kode"].map(peta_sdg))
     panel["penanda"] = ""
 
     jalur = ROOT / "reports" / "anomali.csv"

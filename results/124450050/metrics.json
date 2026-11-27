@@ -1,8 +1,7 @@
 {
   "metrik": {
-    "baris_validasi": 373,
-    "pelanggaran_skema": 0,
-    "kolom_wajib": 11
+    "aturan_validasi": 22,
+    "aturan_lolos": 22
   },
   "seed": 0,
   "data_hash": "5b38cf44085ab091ed026ebe94710c90a1c1f4ff25f2f039d9ee77e32306af4b",

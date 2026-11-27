@@ -28,7 +28,7 @@ Setiap baris berpasangan memuat periode, nilai kedua seri, selisih, dan kategori
 
 | pasangan | utama | pembanding | kategori | baris_berpasangan | baris_tanpa_pasangan | selisih_median |
 |---|---|---|---|---|---|---|
-| R1 | var1353 [Tidak ada] | MDG_0000000003 [Y15T19] | belum terjelaskan | 0 | 16 |  |
+| R1 | var1353 [Tidak ada] | SP.ADO.TFRT [Y15T19] | belum terjelaskan | 0 | 16 |  |
 | R2 | var1353 [Tidak ada] | SP.ADO.TFRT [Y15T19] | metode berbeda | 2 | 63 | 3.30 |
 | R3 | MDG_0000000003 [Y15T19] | SP.ADO.TFRT [Y15T19] | vintage berbeda | 14 | 51 | 1.94 |
 | R4 | var1394 [Tidak ada] | SDGFPALL [Y15T49] | definisi berbeda | 2 | 4 | -20.45 |
