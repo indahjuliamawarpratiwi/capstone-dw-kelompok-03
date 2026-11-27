@@ -1,5 +1,6 @@
 # Laporan tim — Kelompok 3, Kasus 03 Kesehatan reproduksi remaja
 
+Status: **Sprint 2 selesai**. Seluruh angka di bawah dapat ditelusuri ke `data/silver/silver.parquet`, `data/gold/*.parquet`, `data/gold/gudang.duckdb`, `reports/`, `results/kelompok-03/metrics.json`, dan `log-keputusan.csv` (K-001–K-054).
 Status: **Sprint 2 selesai**. Seluruh angka di bawah dapat ditelusuri ke `data/silver/silver.parquet`, `data/gold/*.parquet`, `data/gold/gudang.duckdb`, `reports/`, `results/kelompok-03/metrics.json`, `results/124450055/metrics.json`, dan `log-keputusan.csv` (K-001–K-048).
 
 ## 1. Ringkasan
@@ -62,6 +63,7 @@ Panel lebar lokal berupa **34 baris × 6 kolom** (kode+provinsi, empat kolom `va
 
 ## 6. Integrasi dan rekonsiliasi
 
+`data/gold/rekonsiliasi.parquet` berisi **28 baris**: P1 6, P2 2, P3 4, P4 16. **20 baris memiliki selisih**, **8 baris tanpa pasangan** (P1 4, P3 2, P4 2). Selisih = `nilai_utama − nilai_pembanding`; selisih relatif = `100 × selisih / nilai_pembanding` (bertanda). Median selisih relatif mutlak: **5,61%** untuk seluruh 20 baris berpasangan dan **8,68%** untuk subset 6 baris yang memakai `var1353`/`var1394` sebagai seri utama (P1, P2, P3). Keduanya berbeda cakupan dan tidak saling menggantikan. Enam baris subset memakai angka nasional 9999; sebutan provinsi hanya merujuk pada seri utama yang di panel berada di tingkat provinsi.
 `data/gold/rekonsiliasi.parquet` berisi **28 baris**: P1 6, P2 2, P3 4, P4 16. **20 baris memiliki selisih**, **8 baris tanpa pasangan** (P1 4, P3 2, P4 2). Selisih = `nilai_utama − nilai_pembanding`; selisih relatif = `100 × selisih / nilai_pembanding` (bertanda). Median selisih relatif mutlak: **8,68%** untuk 6 baris berseri utama provinsi dan **5,61%** untuk 20 baris semua pasangan. Angka yang sama tampil di berkas (`data/gold/rekonsiliasi.parquet`: 28), SQL (`SELECT count(*) FROM rekonsiliasi`: 28; `asal='keduanya'`: 20; `asal<>'keduanya'`: 8), laporan (`reports/rekonsiliasi.md`: 28/20/8), dan `results/124450055/metrics.json` (`baris_rekonsiliasi=28`, `selisih_dihitung=20`, `baris_tanpa_pasangan=8`).
 
 Ke-20 baris berpasangan memiliki `kategori` **dan** `penjelasan` terisi; ke-8 baris tanpa pasangan menyimpan kategori `tanpa pasangan` serta penjelasan sumbernya. Tidak ada baris berpasangan yang kategori atau penjelasannya kosong. Contoh yang dihitung: P1 `2012` (48,00 vs 44,616; selisih 3,384) → `metode berbeda`, penjelasan “survei dengan periode rujukan vs estimasi model penduduk tahunan”; P3 `2012` (57,90 vs 79,00; selisih −21,10) → `definisi berbeda`, penjelasan penyebut KB yang berbeda. Kategori dan penjelasan lengkap ada di `reports/rekonsiliasi.md` bagian *Rincian per pasangan* dan di kolom `kategori`/`penjelasan` pada Parquet maupun SQL.
@@ -74,6 +76,34 @@ Ke-20 baris berpasangan memiliki `kategori` **dan** `penjelasan` terisi; ke-8 ba
 | P4 | MDG `umur=15-19` vs WDI | 4,68% | metode berbeda | survei/registrasi vs model WPP |
 
 P2 memasangkan **2012↔2011** (48,0 vs 48,489563) dan **2017↔2016** (36,0 vs 36,109833), keduanya selisih satu tahun, tercatat per baris. Baris tanpa pasangan menyimpan nilai pembanding sumber, tetapi `nilai_utama`, `selisih`, dan `selisih_relatif` kosong. Tidak ada selisih yang dihapus atau disamakan paksa. Bukti: `reports/rekonsiliasi.md`, K-042.
+
+### 6.1 Komposisi pasangan dan besaran selisih
+
+Dari 28 baris, **20 berpasangan** (`asal = keduanya`) dan **8 tanpa pasangan** (`asal = hanya_pembanding`): P1 4, P3 2, P4 2; P2 tidak punya baris satu sisi. Selisih dihitung pada 20 baris berpasangan. Kategori akhir: **18 `metode berbeda`**, **2 `definisi berbeda`**, **8 `tanpa pasangan`**.
+
+| Pasangan | Baris | Berpasangan | Tanpa pasangan | Selisih (`utama − pembanding`) | Median relatif mutlak | Kategori | Penyebab perbedaan |
+|---|---:|---:|---:|---|---:|---|---|
+| P1 | 6 | 2 | 4 | +3,208 s.d. +3,384 per 1.000 (7,58%–9,78%) | 8,68% (n=2) | metode berbeda 2; tanpa pasangan 4 | `var1353` SDKI (survei dua titik) vs `SP.ADO.TFRT` model WPP; BPS lebih tinggi |
+| P2 | 2 | 2 | 0 | −0,489563 s.d. −0,109833 per 1.000 (−1,01% s.d. −0,30%) | 0,66% (n=2) | metode berbeda 2 | WHO survei/registrasi tanpa 2012/2017; pasangan tahun terdekat ≤1 tahun |
+| P3 | 4 | 2 | 2 | −21,1 s.d. −19,8 poin persentase (−26,71% s.d. −25,71%) | 26,21% (n=2) | definisi berbeda 2; tanpa pasangan 2 | penyebut `var1394` tidak dinyatakan, `SDGFPALL` memakai permintaan KB total |
+| P4 | 16 | 14 | 2 | −2,082845 s.d. +5,506048 per 1.000 (−3,93% s.d. +11,00%) | 4,68% (n=14) | metode berbeda 14; tanpa pasangan 2 | MDG WHO survei/registrasi vs WDI model WPP; tahun 2012 dan 2014 tidak berpasangan |
+
+P4 berpasangan pada 14 tahun: 2001–2011, 2013, 2015, 2016. Baris P4 2012 dan 2014 tetap menampilkan nilai WDI tanpa nilai WHO. Median selisih relatif mutlak seluruh 20 baris berpasangan adalah **5,61%** (elemen tengah ke-10 dan ke-11: 5,438541% dan 5,784987%). Subset 6 baris dengan seri utama `var1353`/`var1394` — P1 2, P2 2, P3 2 — memiliki median **8,68%** (elemen tengah ke-3 dan ke-4: 7,584723% dan 9,782874%). P4 tidak masuk subset ini, sehingga kedua median menjawab cakupan yang berbeda.
+
+### 6.2 Uji kesesuaian pasangan
+
+| Pasangan | Indikator | Wilayah | Periode | Rincian | Satuan | Definisi |
+|---|---|---|---|---|---|---|
+| P1 | `var1353` vs `SP.ADO.TFRT` | keduanya 9999 | 2012, 2017 — tahun sama | `total` (15–19 dari judul) vs `total` (15–19 dari nama indikator) | sama: `per_1000_perempuan_seumur` | sepadan; selisih karena metode, bukan satuan/umur |
+| P2 | `var1353` vs `MDG_0000000003` | keduanya 9999 | 2012↔2011, 2017↔2016 — tahun terdekat ≤1, ditandai per baris | `total` (15–19) vs `umur=15-19` (bukan `10-14`) | sama: `per_1000_perempuan_seumur` | sepadan umur/satuan; metode dan tahun amatan berbeda |
+| P3 | `var1394` vs `SDGFPALL` | keduanya 9999 | 2012, 2017 — tahun sama | `total` (15–49) vs `total` (15–49) | sama: persen | **tidak identik**: penyebut WHO = permintaan KB total, BPS tidak menyebut; dicatat sebagai `definisi berbeda`, bukan disamakan |
+| P4 | `MDG_0000000003` vs `SP.ADO.TFRT` | keduanya 9999 | 14 tahun sama | `umur=15-19` vs `total` (15–19) | sama: `per_1000_perempuan_seumur` | sepadan umur/satuan; beda sumber dan metode estimasi |
+
+Keterlacakan: seluruh **20 nilai utama** dan **28 nilai pembanding** di `data/gold/rekonsiliasi.parquet` cocok dengan `data/gold/nasional.parquet` dan `data/silver/silver.parquet` (wilayah 9999) pada kunci `(seri_kode, rincian, periode, _berkas_raw)`; `_sha256_raw_utama` terisi 20/20 dan `_sha256_raw_pembanding` 28/28 (panjang 64). Tidak ada pasangan yang mencampur baris provinsi ke dalam angka nasional.
+
+### 6.3 Cara hitung ulang angka di atas
+
+Dari `data/gold/rekonsiliasi.parquet`: `selisih = nilai_utama − nilai_pembanding`, `selisih_relatif = 100 × selisih / nilai_pembanding` (kolom sudah berupa persen, tidak dikali 100 lagi). Contoh P1 2012: `48,0 − 44,616 = 3,384`; `100 × 3,384 / 44,616 = 7,584723%`. Jumlah baris dan kategori diperoleh dari `groupby('pasangan_id')` serta `value_counts()` pada kolom `asal`, `kategori`, dan `selisih.notna()`. **5,61%** = `median(abs(selisih_relatif))` dari 20 baris berpasangan (P1–P4); **8,68%** = median yang sama dari 6 baris dengan `seri_utama` `var1394`/`var1353` (P1, P2, P3), bukan dari seluruh pasangan dan bukan median P4. Angka 8,68% pada baris P1 di tabel 6.1 kebetulan sama karena dua nilai P1 (7,584723% dan 9,782874%) menjadi elemen tengah subset enam baris tersebut. Alasan kategori dan rincian umur mengikuti `src/konfigurasi.py` (`PASANGAN`, `KATEGORI_BAKU`) serta K-014, K-024, K-026, K-042.
 
 ## 7. Basis data SQL
 
@@ -119,7 +149,7 @@ Pengujian memakai `pytest` dengan cache dinonaktifkan. Tes yang menulis ulang ar
 ## 11. Rujukan artefak
 
 - Silver: `data/silver/silver.parquet`, `src/silver/`, `log-keputusan.csv` K-001–K-034.
-- Gold: `data/gold/panel.parquet`, `panel_lebar.parquet`, `nasional.parquet`, `rekonsiliasi.parquet`, `src/gold/`, `log-keputusan.csv` K-035–K-043.
+- Gold: `data/gold/panel.parquet`, `panel_lebar.parquet`, `nasional.parquet`, `rekonsiliasi.parquet`, `src/gold/`, `log-keputusan.csv` K-035–K-054.
 - SQL: `data/gold/gudang.duckdb`, `src/gold/gold.sql`, `src/gold/muat_sql.py`, `reports/basis-data.md`, K-043.
 - Validasi: `src/validasi/`, `reports/validasi.md`, `results/kelompok-03/metrics.json`, K-044.
 - Artefak Indah (124450055): `results/124450055/metrics.json`, `sprint/sprint-2/124450055.md`, K-045–K-048.
