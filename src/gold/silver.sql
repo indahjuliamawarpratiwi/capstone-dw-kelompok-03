@@ -1,4 +1,4 @@
--- Skema SQL Silver + Gold (DuckDB). Dimuat oleh src/gold/muat_sql.py.
+-- Skema SQL Silver (DuckDB). Dimuat oleh src/gold/muat_sql.py.
 -- Kunci primer = kunci unik tiap lapis. Constraint menolak baris yang tidak konsisten saat dimuat.
 
 CREATE TABLE seri (
@@ -30,50 +30,4 @@ CREATE TABLE silver (
     CHECK (batas_bawah IS NULL OR batas_bawah <= nilai),
     CHECK (batas_atas IS NULL OR nilai <= batas_atas),
     PRIMARY KEY (sumber, seri_kode, wilayah_kode, periode, rincian, _berkas_raw)
-);
-
-CREATE TABLE panel_gold (
-    wilayah_kode   INTEGER  NOT NULL CHECK (wilayah_kode <> 9999),
-    nama_wilayah   VARCHAR  NOT NULL,
-    periode        VARCHAR  NOT NULL,
-    jenis_periode  VARCHAR  NOT NULL CHECK (jenis_periode IN ('tahun', 'semester', 'triwulan', 'bulan')),
-    seri_kode      VARCHAR  NOT NULL REFERENCES seri (seri_kode),
-    sumber         VARCHAR  NOT NULL,
-    rincian        VARCHAR  NOT NULL,
-    nilai          DOUBLE   NOT NULL,
-    satuan         VARCHAR  NOT NULL,
-    sdg_kode       VARCHAR,
-    PRIMARY KEY (wilayah_kode, periode, seri_kode, rincian)
-);
-
-CREATE TABLE nasional (
-    sumber          VARCHAR  NOT NULL,
-    seri_kode       VARCHAR  NOT NULL REFERENCES seri (seri_kode),
-    wilayah_kode    INTEGER  NOT NULL CHECK (wilayah_kode = 9999),
-    nama_wilayah    VARCHAR  NOT NULL,
-    periode         VARCHAR  NOT NULL,
-    jenis_periode   VARCHAR  NOT NULL CHECK (jenis_periode IN ('tahun', 'semester', 'triwulan', 'bulan')),
-    rincian         VARCHAR  NOT NULL,
-    nilai           DOUBLE   NOT NULL,
-    satuan          VARCHAR  NOT NULL,
-    _berkas_raw     VARCHAR  NOT NULL,
-    _sha256_raw     VARCHAR  NOT NULL CHECK (length(_sha256_raw) = 64),
-    PRIMARY KEY (sumber, seri_kode, periode, rincian)
-);
-
-CREATE TABLE rekonsiliasi (
-    pasangan            VARCHAR NOT NULL,
-    seri_utama          VARCHAR NOT NULL,
-    pembanding          VARCHAR NOT NULL,
-    rincian_utama       VARCHAR NOT NULL,
-    rincian_pembanding  VARCHAR NOT NULL,
-    periode             VARCHAR NOT NULL,
-    nilai_utama         DOUBLE,
-    nilai_pembanding    DOUBLE,
-    selisih             DOUBLE,
-    status_pasangan     VARCHAR NOT NULL CHECK (status_pasangan IN ('berpasangan', 'tanpa_pasangan')),
-    kategori            VARCHAR NOT NULL CHECK (kategori IN ('definisi berbeda', 'metode berbeda', 'vintage berbeda', 'cakupan berbeda', 'belum terjelaskan')),
-    dugaan              VARCHAR,
-    bukti               VARCHAR,
-    PRIMARY KEY (pasangan, pembanding, periode)
 );

@@ -29,12 +29,12 @@ Rincian: BPS total = umur 15–19 (judul); WDI hanya 15–19.
 
 | seri_pembanding | tahun_utama | tahun_pembanding | selisih_tahun | nilai_utama | nilai_pembanding | selisih | selisih_relatif | asal | kategori | catatan | _berkas_raw_utama | _berkas_raw_pembanding |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| SP.ADO.TFRT | 2012 | 2012 | 0 | 48.00 | 44.62 | 3.38 | 7.58 | keduanya | metode berbeda |  | bps/2026-10-20/json/sdg3_3_7_2_v1353.json | wdi/2026-10-20/data/kelompok-03-hal-01.json |
-| SP.ADO.TFRT | 2013 | 2013 | 0 |  | 42.67 |  |  | hanya_pembanding | tanpa pasangan |  |  | wdi/2026-10-20/data/kelompok-03-hal-01.json |
-| SP.ADO.TFRT | 2014 | 2014 | 0 |  | 40.13 |  |  | hanya_pembanding | tanpa pasangan |  |  | wdi/2026-10-20/data/kelompok-03-hal-01.json |
-| SP.ADO.TFRT | 2015 | 2015 | 0 |  | 37.86 |  |  | hanya_pembanding | tanpa pasangan |  |  | wdi/2026-10-20/data/kelompok-03-hal-01.json |
-| SP.ADO.TFRT | 2016 | 2016 | 0 |  | 35.36 |  |  | hanya_pembanding | tanpa pasangan |  |  | wdi/2026-10-20/data/kelompok-03-hal-01.json |
-| SP.ADO.TFRT | 2017 | 2017 | 0 | 36.00 | 32.79 | 3.21 | 9.78 | keduanya | metode berbeda |  | bps/2026-10-20/json/sdg3_3_7_2_v1353.json | wdi/2026-10-20/data/kelompok-03-hal-01.json |
+| SP.ADO.TFRT | 2012 | 2012 | 0 | 48.00 | 44.62 | 3.38 | 7.58 | keduanya | metode berbeda |  | bps/2026-10-20/json/sdg3_3_7_2_v1353.json | wdi/2026-10-20/data/kelompok-07-hal-01.json |
+| SP.ADO.TFRT | 2013 | 2013 | 0 |  | 42.67 |  |  | hanya_pembanding | tanpa pasangan |  |  | wdi/2026-10-20/data/kelompok-07-hal-01.json |
+| SP.ADO.TFRT | 2014 | 2014 | 0 |  | 40.13 |  |  | hanya_pembanding | tanpa pasangan |  |  | wdi/2026-10-20/data/kelompok-07-hal-01.json |
+| SP.ADO.TFRT | 2015 | 2015 | 0 |  | 37.86 |  |  | hanya_pembanding | tanpa pasangan |  |  | wdi/2026-10-20/data/kelompok-07-hal-01.json |
+| SP.ADO.TFRT | 2016 | 2016 | 0 |  | 35.36 |  |  | hanya_pembanding | tanpa pasangan |  |  | wdi/2026-10-20/data/kelompok-07-hal-01.json |
+| SP.ADO.TFRT | 2017 | 2017 | 0 | 36.00 | 32.79 | 3.21 | 9.78 | keduanya | metode berbeda |  | bps/2026-10-20/json/sdg3_3_7_2_v1353.json | wdi/2026-10-20/data/kelompok-07-hal-01.json |
 
 ### P2: Angka kelahiran remaja 15–19: BPS vs WHO
 
@@ -68,19 +68,19 @@ Rincian: WHO umur=15-19.
 
 | seri_pembanding | tahun_utama | tahun_pembanding | selisih_tahun | nilai_utama | nilai_pembanding | selisih | selisih_relatif | asal | kategori | catatan | _berkas_raw_utama | _berkas_raw_pembanding |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| SP.ADO.TFRT | 2001 | 2001 | 0 | 50.93 | 53.02 | -2.08 | -3.93 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-03-hal-01.json |
-| SP.ADO.TFRT | 2002 | 2002 | 0 | 53.12 | 51.76 | 1.36 | 2.63 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-03-hal-01.json |
-| SP.ADO.TFRT | 2003 | 2003 | 0 | 55.92 | 50.41 | 5.51 | 10.92 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-03-hal-01.json |
-| SP.ADO.TFRT | 2004 | 2004 | 0 | 51.00 | 48.21 | 2.79 | 5.78 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-03-hal-01.json |
-| SP.ADO.TFRT | 2005 | 2005 | 0 | 52.28 | 48.10 | 4.19 | 8.71 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-03-hal-01.json |
-| SP.ADO.TFRT | 2006 | 2006 | 0 | 50.95 | 47.77 | 3.19 | 6.67 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-03-hal-01.json |
-| SP.ADO.TFRT | 2007 | 2007 | 0 | 49.48 | 47.67 | 1.82 | 3.81 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-03-hal-01.json |
-| SP.ADO.TFRT | 2008 | 2008 | 0 | 46.88 | 46.29 | 0.59 | 1.28 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-03-hal-01.json |
-| SP.ADO.TFRT | 2009 | 2009 | 0 | 47.00 | 45.59 | 1.41 | 3.08 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-03-hal-01.json |
-| SP.ADO.TFRT | 2010 | 2010 | 0 | 46.86 | 45.68 | 1.18 | 2.59 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-03-hal-01.json |
-| SP.ADO.TFRT | 2011 | 2011 | 0 | 48.49 | 45.59 | 2.90 | 6.35 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-03-hal-01.json |
-| SP.ADO.TFRT | 2012 | 2012 | 0 |  | 44.62 |  |  | hanya_pembanding | tanpa pasangan |  |  | wdi/2026-10-20/data/kelompok-03-hal-01.json |
-| SP.ADO.TFRT | 2013 | 2013 | 0 | 47.37 | 42.67 | 4.69 | 11.00 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-03-hal-01.json |
-| SP.ADO.TFRT | 2014 | 2014 | 0 |  | 40.13 |  |  | hanya_pembanding | tanpa pasangan |  |  | wdi/2026-10-20/data/kelompok-03-hal-01.json |
-| SP.ADO.TFRT | 2015 | 2015 | 0 | 39.92 | 37.86 | 2.06 | 5.44 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-03-hal-01.json |
-| SP.ADO.TFRT | 2016 | 2016 | 0 | 36.11 | 35.36 | 0.75 | 2.13 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-03-hal-01.json |
+| SP.ADO.TFRT | 2001 | 2001 | 0 | 50.93 | 53.02 | -2.08 | -3.93 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-07-hal-01.json |
+| SP.ADO.TFRT | 2002 | 2002 | 0 | 53.12 | 51.76 | 1.36 | 2.63 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-07-hal-01.json |
+| SP.ADO.TFRT | 2003 | 2003 | 0 | 55.92 | 50.41 | 5.51 | 10.92 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-07-hal-01.json |
+| SP.ADO.TFRT | 2004 | 2004 | 0 | 51.00 | 48.21 | 2.79 | 5.78 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-07-hal-01.json |
+| SP.ADO.TFRT | 2005 | 2005 | 0 | 52.28 | 48.10 | 4.19 | 8.71 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-07-hal-01.json |
+| SP.ADO.TFRT | 2006 | 2006 | 0 | 50.95 | 47.77 | 3.19 | 6.67 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-07-hal-01.json |
+| SP.ADO.TFRT | 2007 | 2007 | 0 | 49.48 | 47.67 | 1.82 | 3.81 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-07-hal-01.json |
+| SP.ADO.TFRT | 2008 | 2008 | 0 | 46.88 | 46.29 | 0.59 | 1.28 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-07-hal-01.json |
+| SP.ADO.TFRT | 2009 | 2009 | 0 | 47.00 | 45.59 | 1.41 | 3.08 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-07-hal-01.json |
+| SP.ADO.TFRT | 2010 | 2010 | 0 | 46.86 | 45.68 | 1.18 | 2.59 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-07-hal-01.json |
+| SP.ADO.TFRT | 2011 | 2011 | 0 | 48.49 | 45.59 | 2.90 | 6.35 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-07-hal-01.json |
+| SP.ADO.TFRT | 2012 | 2012 | 0 |  | 44.62 |  |  | hanya_pembanding | tanpa pasangan |  |  | wdi/2026-10-20/data/kelompok-07-hal-01.json |
+| SP.ADO.TFRT | 2013 | 2013 | 0 | 47.37 | 42.67 | 4.69 | 11.00 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-07-hal-01.json |
+| SP.ADO.TFRT | 2014 | 2014 | 0 |  | 40.13 |  |  | hanya_pembanding | tanpa pasangan |  |  | wdi/2026-10-20/data/kelompok-07-hal-01.json |
+| SP.ADO.TFRT | 2015 | 2015 | 0 | 39.92 | 37.86 | 2.06 | 5.44 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-07-hal-01.json |
+| SP.ADO.TFRT | 2016 | 2016 | 0 | 36.11 | 35.36 | 0.75 | 2.13 | keduanya | metode berbeda |  | who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv | wdi/2026-10-20/data/kelompok-07-hal-01.json |

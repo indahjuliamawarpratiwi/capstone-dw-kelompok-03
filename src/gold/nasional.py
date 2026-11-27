@@ -10,8 +10,6 @@ from src import konfigurasi as K
 from src import wilayah as W
 from src.laporan import ROOT, catat, tabel_md, tulis
 
-<<<<<<< HEAD
-=======
 SERI_UTAMA = {"var1394", "var1353"}
 RINCIAN_NASIONAL = {"MDG_0000000003": "umur=15-19"}
 LABEL_SUMBER = {"bps": "BPS", "wdi": "WDI", "who_gho": "WHO GHO"}
@@ -70,7 +68,7 @@ KELOMPOK_UMUR = {
 }
 
 REKONSILIASI_PASANGAN = [
-    dict(id="R1", utama=("var1353", "Tidak ada"), pembanding=("MDG_0000000003", "Y15T19"),
+    dict(id="R1", utama=("var1353", "Tidak ada"), pembanding=("SP.ADO.TFRT", "Y15T19"),
          kategori="belum terjelaskan",
          dugaan="Tidak ada tahun yang sama; tahun terdekat tidak dipaksa menjadi pasangan.",
          bukti="BPS hanya 2012 dan 2017 (TAHUN_TERBIT); WHO Y15T19 tidak memuat kedua tahun itu.",
@@ -96,7 +94,6 @@ REKONSILIASI_PASANGAN = [
          bukti_kosong="Berkas WHO SDGFPALL memuat 6 baris national Y15T49."),
 ]
 
->>>>>>> 3a5346748eedaaeec4a3d50b069ead6bb0b0c605
 
 def tabel_nasional(silver):
     nas = silver[silver["wilayah_kode"] == W.INDONESIA].copy()
@@ -106,8 +103,6 @@ def tabel_nasional(silver):
     return nas, lebar
 
 
-<<<<<<< HEAD
-=======
 def tabel_nasional_panjang(nas):
     """Tabel Gold: satu baris per periode x seri, termasuk asal angka nasional.
 
@@ -148,6 +143,8 @@ def tabel_nasional_panjang(nas):
              "rincian", "rincian_dipakai", "nilai", "satuan", "sdg_kode", "asal_angka", "aturan_agregat",
              "catatan_rincian", "_berkas_raw", "_sha256_raw"]
     return out[kolom].sort_values(["periode", "seri_kode"], kind="stable").reset_index(drop=True)
+
+
 def tabel_nasional_ekstraksi(ekstraksi):
     """Satu tabel nasional periode x seri dari keluaran tahap 1, dengan rincian asli tiap sumber."""
     if not ekstraksi:
@@ -216,15 +213,12 @@ def tabel_rekonsiliasi(nasional):
     return pd.DataFrame(baris)
 
 
->>>>>>> 3a5346748eedaaeec4a3d50b069ead6bb0b0c605
 def irisan(silver, utama, rinci_utama, pembanding, semester=None):
     def per(seri, rinci):
         s = silver[(silver["seri_kode"] == seri) & (silver["rincian"] == rinci) & (silver["wilayah_kode"] == W.INDONESIA)]
-        # tahun proyeksi (bukan estimasi atas data) tidak ikut tabel rekonsiliasi
         return set(s["periode"]) - set(getattr(K, "PROYEKSI", {}).get(seri, set()))
     a = per(utama, rinci_utama)
     if semester:
-        # seri semesteran dibandingkan dengan seri tahunan lewat satu semester yang ditetapkan (misalnya S1 = Maret)
         a = {p[:4] for p in a if len(p) == 4 or p.endswith(f"-{semester}")}
     return sorted(set.intersection(a, *[per(s, r) for s, r in pembanding])) if pembanding else []
 
@@ -341,10 +335,5 @@ def jalankan(silver, ekstraksi=None):
         tabel_md(rek[rek["status_pasangan"] == "tanpa_pasangan"].groupby("pasangan").size().rename("baris").reset_index()),
         "## Rincian alasan pasangan lama", *bagian,
     ]))
-<<<<<<< HEAD
-    return {"nasional": nas, "pasangan": daftar}
-=======
     return {"nasional": nas, "nasional_panjang": panjang, "pasangan": daftar,
-            "tabel_nasional_gold": str(gold / "tabel-nasional.csv")}
-    return {"nasional": nas, "pasangan": daftar, "pasangan_panduan": panduan}
->>>>>>> 3a5346748eedaaeec4a3d50b069ead6bb0b0c605
+            "pasangan_panduan": panduan, "tabel_nasional_gold": str(gold / "tabel-nasional.csv")}

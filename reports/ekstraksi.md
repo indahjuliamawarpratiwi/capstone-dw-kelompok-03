@@ -9,7 +9,7 @@ Dihasilkan `python pipeline.py`. Peran *data* berisi angka; *meta* berisi judul,
 | bps/2026-10-20/manifest_asal.json | bps_manifest_asal | meta | 36 | semua tabel unduhan BPS, bukan hanya kasus ini |
 | bps/2026-10-20/sdg3_3_7_1_v1394.csv | bps_csv | data | 69 |  |
 | bps/2026-10-20/sdg3_3_7_2_v1353.csv | bps_csv | data | 69 |  |
-| wdi/2026-10-20/data/kelompok-03-hal-01.json | wdi_data | data | 66 | 2,112 baris di berkas, 1 seri kasus disaring |
+| wdi/2026-10-20/data/kelompok-07-hal-01.json | wdi_data | data | 66 | 2,112 baris di berkas, 1 seri kasus disaring |
 | wdi/2026-10-20/metadata/sumber.json | wdi_sumber | meta | 71 |  |
 | wdi/2026-10-20/metadata/sumber2_indikator.json | wdi_meta | meta | 1 | metadata seri kasus saja |
 | wdi/2026-10-20/metadata/sumber46_indikator.json | wdi_meta | meta | 1 | metadata seri kasus saja |
