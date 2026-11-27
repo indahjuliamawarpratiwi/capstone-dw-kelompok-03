@@ -21,7 +21,7 @@ Satu baris = satu seri x wilayah x periode x rincian x berkas sumber. Kunci unik
 | batas_bawah | float64 | 235 | — | RATE_*_NL WHO | batas bawah ketidakpastian; kosong bila sumber tidak memberi |
 | batas_atas | float64 | 235 | — | RATE_*_NU WHO | batas atas ketidakpastian; kosong bila sumber tidak memberi |
 | rujukan_tahun | Int64 | 235 | — | var.note BPS; log | lebar jendela rujukan survei (tahun sebelum survei); kosong bila tidak berlaku |
-| _berkas_raw | str | 0 | bps/2026-10-20/json/sdg3_3_7_1_v1394.json, bps/2026-10-20/json/sdg3_3_7_2_v1353.json, wdi/2026-10-20/data/kelompok-07-hal-01.json, who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv, who_gho/2026-10-20/datadot/8074BD9_SDGFPALL.csv | jalur berkas mentah relatif data/raw/ | lineage: berkas asal baris ini |
+| _berkas_raw | str | 0 | bps/2026-10-20/json/sdg3_3_7_1_v1394.json, bps/2026-10-20/json/sdg3_3_7_2_v1353.json, wdi/2026-10-20/data/kelompok-03-hal-01.json, who_gho/2026-10-20/datadot/27D371A_MDG_0000000003.csv, who_gho/2026-10-20/datadot/8074BD9_SDGFPALL.csv | jalur berkas mentah relatif data/raw/ | lineage: berkas asal baris ini |
 | _sha256_raw | str | 0 | 230ce163135e9ea9e078649b2812136780e9e2db9d4c110dc3e21f2fe50faf5a, 6ae359c6df0dfd6ce210233dc28ada9060be0996f855288d6c4fbfee88b55c74, 894de8e94f8c2c76aaa44f3a3f541607429e924d9101a80a2d5eebcfe433284b, 9a8729675761d697bd5556d66fd903ed841ee454e7324d41084dc09b9905f912, efd85410d3d2939a3fabcb1a17489a3860985eec2685d49787919c3657a7e702 | src.common.manifest.sha256_raw | lineage: sidik isi berkas asal, dicocokkan dengan MANIFEST.csv |
 
 ## Kamus rincian

@@ -30,4 +30,4 @@ DuckDB dipilih karena satu berkas tanpa server, membaca Parquet langsung, dan cu
 
 | pertanyaan | tabel_silver | dokumen_json | ms_silver | ms_dokumen | catatan |
 |---|---|---|---|---|---|
-| berapa angka var1353 di `bps/2026-10-20/json/sdg3_3_7_2_v1353.json` | 69 | 0 | 2.04 | 1.94 | dokumen menghitung semua kunci datacontent (termasuk wilayah/rincian yang tidak masuk Silver); tabel Silver hanya baris yang lolos pembacaan |
+| berapa angka var1353 di `bps/2026-10-20/json/sdg3_3_7_2_v1353.json` | 69 | 0 | 2.27 | 2.37 | dokumen menghitung semua kunci datacontent (termasuk wilayah/rincian yang tidak masuk Silver); tabel Silver hanya baris yang lolos pembacaan |
