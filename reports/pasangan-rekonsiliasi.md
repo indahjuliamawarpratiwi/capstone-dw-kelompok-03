@@ -2,16 +2,7 @@
 
 Dihasilkan `python pipeline.py` (`src/gold/nasional.py`) dari Silver dan `src/konfigurasi.py`. Selisih dihitung di Sprint 2; Sprint 1 memastikan setiap pasangan memang sebanding dan mencatat tahun yang beririsan.
 
-Tabel nasional (periode x seri, rincian total, tampilan lebar): `reports/tabel-nasional.csv`. Tabel nasional lengkap dari hasil ekstraksi (semua rincian, satu baris per periode x seri): `data/gold/nasional_periode_seri.parquet`. Kolom BPS hanya terisi pada tahun survei; itu bentuk datanya, tidak diisi.
-
-Untuk SDG 3.7.2, perbandingan tiga seri memakai `var1353` (BPS, cakupan 15–19, rincian mentah `Tidak ada`), `MDG_0000000003` rincian `Y15T19` (bukan `Y10T14`), dan `SP.ADO.TFRT` (WDI, 15–19 dari nama indikator). Ketiganya menarget perempuan 15–19 dan satuan per 1.000, jadi kelompok umur disamakan lebih dulu sebelum selisih dihitung. Tidak ada tahun yang beririsan untuk ketiganya, jadi selisih tiga seri tidak dihitung dan perbandingan dilakukan berpasangan (P1, P2, P4). Untuk SDG 3.7.1, `var1394` (rincian `Tidak ada`, 15–49 dari judul) dan `SDGFPALL` (`DIM_AGE=Y15T49`, `DIM_SEX=FEMALE`) sama-sama perempuan 15–49, tetapi status perkawinan dan penyebutnya tidak dinyatakan identik; keduanya tidak membatasi pada perempuan menikah saja, dan Limitations WHO mencatat perbedaan base populasi antarsurvei.
-
-## Pasangan dari panduan kelompok bagian 3
-
-| pasangan | rincian_dipakai | kelompok_umur | status_perkawinan_populasi | periode_beririsan_berpasangan | dapat_dibandingkan_langsung | alasan_keterbandingan |
-|---|---|---|---|---|---|---|
-| var1353 vs MDG_0000000003(Y15T19) vs SP.ADO.TFRT | var1353: turvar='Tidak ada' (umur 15-19 ada di judul); MDG_0000000003: DIM_AGE=Y15T19 (bukan Y10T14), DIM_SEX=FEMALE; SP.ADO.TFRT: age=15-19 dari nama indikator | 15-19 pada ketiga seri | perempuan 15-19; var1353 dari SDKI, WHO dari survei/registrasi, WDI dari estimasi UN WPP; tidak ada syarat status perkawinan di definisi | var1353∩SP.ADO.TFRT={2012,2017}; var1353∩MDG Y15T19=∅; MDG Y15T19∩SP.ADO.TFRT={2001-2011,2013,2015,2016} | tidak untuk 3 seri (tahun bersama kosong) | Kelompok umur 15-19 dan satuan per 1,000 sama pada ketiga seri; yang berbeda hanya metode/vintage (SDKI, WHO, WPP) dan tahun amatan |
-| var1394 vs SDGFPALL | var1394: turvar='Tidak ada' (15-49 dan 'atau pasangannya' dari judul); SDGFPALL: DIM_AGE=Y15T49 (konstan di berkas), DIM_SEX=FEMALE | 15-49 pada kedua seri | keduanya perempuan 15-49, tidak dibatasi hanya yang menikah/bersatu; WHO menghitung pasangan yang memakai metode modern di numerator, denominator seluruh permintaan KB; Limitations WHO mencatat perbedaan status perkawinan/base populasi antarsurvei | 2012;2017 | berpotensi, bersyarat pada verifikasi penyebut/status perkawinan | Umur 15-49, satuan persen, dan konsep kebutuhan KB terpenuhi dengan metode modern sama; penyebut WHO = pemakai semua metode + kebutuhan tak terpenuhi, sedangkan judul var1394 tidak menyebut penyebutnya |
+Tabel nasional (periode x seri, rincian total, tampilan lebar): `reports/tabel-nasional.csv`. Kolom BPS hanya terisi pada tahun survei; itu bentuk datanya, tidak diisi.
 
 ## Ringkasan pasangan
 

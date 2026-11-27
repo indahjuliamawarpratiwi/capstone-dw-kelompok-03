@@ -1,6 +1,7 @@
 # Laporan tim — Kelompok 3, Kasus 03 Kesehatan reproduksi remaja
 
 Status: **Sprint 2 selesai**. Seluruh angka di bawah dapat ditelusuri ke `data/silver/silver.parquet`, `data/gold/*.parquet`, `data/gold/gudang.duckdb`, `reports/`, `results/kelompok-03/metrics.json`, dan `log-keputusan.csv` (K-001–K-054).
+Status: **Sprint 2 selesai**. Seluruh angka di bawah dapat ditelusuri ke `data/silver/silver.parquet`, `data/gold/*.parquet`, `data/gold/gudang.duckdb`, `reports/`, `results/kelompok-03/metrics.json`, `results/124450055/metrics.json`, dan `log-keputusan.csv` (K-001–K-048).
 
 ## 1. Ringkasan
 
@@ -10,7 +11,24 @@ Fokus kasus tetap pada pembedaan hal yang tampak “sama”: `var1353` hanya umu
 
 ## 2. Data dan lineage
 
-Paket mentah terdiri dari **13 berkas** snapshot 17–20 Oktober 2026 (BPS 2 CSV + 2 JSON + 1 manifest asal; WDI 1 data + 3 metadata; WHO GHO 2 CSV + 2 metadata). `ekstraksi.jalankan()` membaca seluruh berkas manifest dengan `_berkas_raw` dan `_sha256_raw` dari `src.common.manifest.sha256_raw`;lympi **0 berkas terlewat** dan **0 SHA256 tidak cocok**. Silver memuat 374 baris data observasi terpilih dari 5 seri.
+Respons JSON mentah tetap disimpan apa adanya di `data/raw/` sebagai lapis Bronze/arsip lineage, dan
+satu salinan juga dimuat ke tabel dokumen `dokumen_mentah` (9 baris) agar tetap bisa diaudit dari SQL.
+Untuk Silver dan Gold dipakai **DuckDB** (`data/gold/gudang.duckdb`, dibuat ulang oleh `python pipeline.py`,
+tidak di-commit): DDL ada di `src/gold/silver.sql` dan `src/gold/gold.sql`. Setelah pipeline terakhir,
+basis data berisi **6 tabel**: `seri` 5, `silver` 235, `gold_panel` 152, `gold_nasional` 89,
+`rekonsiliasi` 28, dan `dokumen_mentah` 9 baris — total **269 baris Gold relasional** pada 5 tabel
+pertama (`tabel_sql=5`, tidak menghitung tabel dokumen). Jumlah ini sama dengan Parquet/CSV sumber:
+`data/silver/silver.parquet` 235, `data/gold/panel.parquet` 152, `data/gold/nasional.parquet` 89,
+dan `data/gold/rekonsiliasi.parquet` 28; duplikat kunci primer 0 pada keenam tabel.
+DuckDB dipilih karena skema lapis ini stabil, kunci komposit serta CHECK dapat dipaksakan, dan tabel dapat
+di-query/join/agregasi langsung dari Parquet tanpa server; JSON dokumen lebih fleksibel untuk variasi field
+sumber tetapi nested/heterogen, sulit divalidasi dan lambat untuk query analitik. Dengan demikian JSON cocok
+pada Bronze untuk keterlacakan, sedangkan tabel SQL dipakai pada Silver (konsistensi), Gold (panel,
+agregasi nasional, dan pasangan rekonsiliasi), serta arsip dokumen (`dokumen_mentah`).
+Bukti hitungan: `reports/basis-data.md`, `reports/angka.json`, dan `log-keputusan.csv` K-045.
+
+## Masalah data dan penanganannya
+Paket mentah terdiri dari **13 berkas** snapshot 17–20 Oktober 2026 (BPS 2 CSV + 2 JSON + 1 manifest asal; WDI 1 data + 3 metadata; WHO GHO 2 CSV + 2 metadata). `ekstraksi.jalankan()` membaca seluruh berkas manifest dengan `_berkas_raw` dan `_sha256_raw` dari `src.common.manifest.sha256_raw`; **0 berkas terlewat** dan **0 SHA256 tidak cocok**. Silver memuat 374 baris data observasi terpilih dari 5 seri.
 
 Bukti: `reports/ekstraksi.md`, `src/ekstraksi/`, `src/common/manifest.py`, `log-keputusan.csv` K-002, K-013, K-018.
 
@@ -46,6 +64,9 @@ Panel lebar lokal berupa **34 baris × 6 kolom** (kode+provinsi, empat kolom `va
 ## 6. Integrasi dan rekonsiliasi
 
 `data/gold/rekonsiliasi.parquet` berisi **28 baris**: P1 6, P2 2, P3 4, P4 16. **20 baris memiliki selisih**, **8 baris tanpa pasangan** (P1 4, P3 2, P4 2). Selisih = `nilai_utama − nilai_pembanding`; selisih relatif = `100 × selisih / nilai_pembanding` (bertanda). Median selisih relatif mutlak: **5,61%** untuk seluruh 20 baris berpasangan dan **8,68%** untuk subset 6 baris yang memakai `var1353`/`var1394` sebagai seri utama (P1, P2, P3). Keduanya berbeda cakupan dan tidak saling menggantikan. Enam baris subset memakai angka nasional 9999; sebutan provinsi hanya merujuk pada seri utama yang di panel berada di tingkat provinsi.
+`data/gold/rekonsiliasi.parquet` berisi **28 baris**: P1 6, P2 2, P3 4, P4 16. **20 baris memiliki selisih**, **8 baris tanpa pasangan** (P1 4, P3 2, P4 2). Selisih = `nilai_utama − nilai_pembanding`; selisih relatif = `100 × selisih / nilai_pembanding` (bertanda). Median selisih relatif mutlak: **8,68%** untuk 6 baris berseri utama provinsi dan **5,61%** untuk 20 baris semua pasangan. Angka yang sama tampil di berkas (`data/gold/rekonsiliasi.parquet`: 28), SQL (`SELECT count(*) FROM rekonsiliasi`: 28; `asal='keduanya'`: 20; `asal<>'keduanya'`: 8), laporan (`reports/rekonsiliasi.md`: 28/20/8), dan `results/124450055/metrics.json` (`baris_rekonsiliasi=28`, `selisih_dihitung=20`, `baris_tanpa_pasangan=8`).
+
+Ke-20 baris berpasangan memiliki `kategori` **dan** `penjelasan` terisi; ke-8 baris tanpa pasangan menyimpan kategori `tanpa pasangan` serta penjelasan sumbernya. Tidak ada baris berpasangan yang kategori atau penjelasannya kosong. Contoh yang dihitung: P1 `2012` (48,00 vs 44,616; selisih 3,384) → `metode berbeda`, penjelasan “survei dengan periode rujukan vs estimasi model penduduk tahunan”; P3 `2012` (57,90 vs 79,00; selisih −21,10) → `definisi berbeda`, penjelasan penyebut KB yang berbeda. Kategori dan penjelasan lengkap ada di `reports/rekonsiliasi.md` bagian *Rincian per pasangan* dan di kolom `kategori`/`penjelasan` pada Parquet maupun SQL.
 
 | Pasangan | Yang dibandingkan | Median relatif | Kategori | Alasan |
 |---|---|---:|---|---|
@@ -131,4 +152,5 @@ Pengujian memakai `pytest` dengan cache dinonaktifkan. Tes yang menulis ulang ar
 - Gold: `data/gold/panel.parquet`, `panel_lebar.parquet`, `nasional.parquet`, `rekonsiliasi.parquet`, `src/gold/`, `log-keputusan.csv` K-035–K-054.
 - SQL: `data/gold/gudang.duckdb`, `src/gold/gold.sql`, `src/gold/muat_sql.py`, `reports/basis-data.md`, K-043.
 - Validasi: `src/validasi/`, `reports/validasi.md`, `results/kelompok-03/metrics.json`, K-044.
+- Artefak Indah (124450055): `results/124450055/metrics.json`, `sprint/sprint-2/124450055.md`, K-045–K-048.
 - Angka dan grafik: `reports/angka.json`, `reports/tabel/`, `reports/gambar/`.

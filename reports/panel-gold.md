@@ -1,29 +1,34 @@
-# Panel Gold provinsi dan tabel nasional
+# Panel Gold provinsi x periode x indikator
 
-Dihasilkan `python pipeline.py` (`src/gold/panel.py`). Satu sel = satu seri x provinsi x periode.
+Dihasilkan `python pipeline.py` (`src/gold/panel.py`) dari Silver, grid, dan kategori anomali Sprint 1.
 
-## Aturan pemilihan
+## Aturan satu nilai per sel
 
-- Sumber kanonik BPS: JSON sesuai K-002; CSV tetap pembanding.
+1. **Snapshot**: seri yang ada di dua snapshot memakai snapshot terbaru; angka snapshot lain dibandingkan di `reports/snapshot-bps.csv` (bila ada).
+2. **Rincian**: satu indikator = satu deret utama (`total`, atau rincian di `DERET`). Rincian lain tetap di Silver.
+3. **Berkas**: bila satu sel punya beberapa berkas, `URUTAN_BERKAS` memilih satu (`reports/deret-berkas.csv`).
+4. **Periode**: disimpan apa adanya; tidak dirata-rata ke tahunan.
+5. **Penanda**: outlier, patahan, dan galat input dari Sprint 1 ikut sebagai kolom `penanda`; nilainya tidak diubah.
 
-- Panel hanya `var1394` dan `var1353`, rincian `total`; `9999` tidak masuk panel (K-025).
+Baris Silver provinsi yang tidak masuk panel (rincian lain atau berkas lain): 0.
 
-- Satu nilai per sel; duplikat kunci tidak diizinkan.
+## Indikator
 
-- Tabel nasional memuat rincian yang dipakai `PASANGAN` dari BPS, WHO, dan WDI; rincian umur `10-14` tetap hanya di Silver (K-041).
+| indikator | satuan | periode | jumlah_periode | sel | terisi | ditandai |
+|---|---|---|---|---|---|---|
+| var1353 | per_1000_perempuan_seumur | 2012–2017 | 2 | 76 | 67 | 1 |
+| var1394 | persen | 2012–2017 | 2 | 76 | 67 | 2 |
 
-- Penanda Sprint 1 dibawa apa adanya; nilai anomali tidak diubah.
+## Status sel
 
-- Hanya periode tahunan; tidak ada agregasi semesteran atau bulanan.
+| indikator | belum_ada | terisi |
+|---|---|---|
+| var1353 | 9 | 67 |
+| var1394 | 9 | 67 |
 
-## Ringkasan
+`terisi` = ada angka; kategori lain berasal dari grid Sprint 1 (`reports/kelengkapan-panel.md`). Sel kosong tidak diisi: tidak ada interpolasi di Gold.
 
-| ukuran | nilai |
-|---|---|
-| baris panel | 152 |
-| sel terisi | 134 |
-| sel kosong berkategori | 18 |
-| sel bertanda | 5 |
-| baris tabel nasional | 89 |
+## Berkas
 
-Rincian sel kosong: `reports/grid-sel-kosong.csv`. Penanda: `reports/anomali.csv`.
+- `data/gold/panel.parquet`: 152 baris (panjang, termasuk sel kosong).
+- `data/gold/panel_lebar.parquet`: 67 baris x 6 kolom (hanya sel terisi; satu kolom per indikator, satuan per indikator di `docs/data-dictionary.md`).

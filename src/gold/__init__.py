@@ -1,22 +1,25 @@
 """Tahap 4–6 — Gold (Sprint 2): panel, nasional, rekonsiliasi, dan DuckDB.
 
-Satu definisi `jalankan` — inilah versi yang tersisa setelah merge dan yang dipanggil
-`pipeline.py` lewat `gold.jalankan(h["silver"])`. Argumen `ekstraksi` opsional tetap diterima
-agar tanda tangan fungsi kompatibel dengan versi main.
+Menggabungkan keluaran nasional Sprint 1 dengan panel, nasional Gold,
+dan rekonsiliasi Sprint 2.
 """
-from src.gold import muat_sql, panel, rekonsiliasi
+from src.gold import muat_sql, nasional, panel, rekonsiliasi
 
 
 def jalankan(silver, ekstraksi=None):
+    hasil = nasional.jalankan(silver, ekstraksi)
+
     hasil_panel = panel.jalankan(silver)
-    hasil_rek = rekonsiliasi.jalankan(hasil_panel["nasional_gold"])
-    hasil = {
-        "panel": hasil_panel["panel"],
-        "panel_lebar": hasil_panel["panel_lebar"],
-        "nasional_gold": hasil_panel["nasional_gold"],
-        "rekonsiliasi": hasil_rek["rekonsiliasi"],
-    }
+    hasil["panel"] = hasil_panel["panel"]
+    hasil["panel_lebar"] = hasil_panel["panel_lebar"]
+    hasil["nasional_gold"] = hasil_panel["nasional_gold"]
+
+    hasil_rek = rekonsiliasi.jalankan(hasil["nasional_gold"])
+    hasil["rekonsiliasi"] = hasil_rek["rekonsiliasi"]
+
     hasil["baris_sql"] = muat_sql.jalankan(silver, hasil)
+
     if ekstraksi is not None:
         hasil["ekstraksi"] = ekstraksi
+
     return hasil
