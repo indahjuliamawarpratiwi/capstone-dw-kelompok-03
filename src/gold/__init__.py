@@ -1,17 +1,11 @@
-"""Tahap 4–6 — Gold: panel, tabel nasional, rekonsiliasi, dan pemuatan ke DuckDB."""
-from src.gold import muat_sql, nasional, panel, rekonsiliasi
+from src.gold import muat_sql, nasional, nasional_gold, panel, rekonsiliasi
 
 
-
-def jalankan(silver, ekstraksi=None):
+def jalankan(silver):
     hasil = nasional.jalankan(silver)
-    hasil["baris_sql"] = muat_sql.jalankan(silver)
-    if ekstraksi is not None:
-        hasil["ekstraksi"] = ekstraksi
-    return hasil
-def jalankan(silver, ekstraksi=None):
-    hasil = nasional.jalankan(silver, ekstraksi)
-    hasil.update(panel.jalankan(silver))
-    hasil.update(rekonsiliasi.jalankan(hasil["nasional_gold"]))
+    hasil["panel"] = panel.jalankan(silver)
+    hasil["nasional"] = nasional_gold.jalankan(silver)
+    hasil["nasional_gold"] = hasil["nasional"]
+    hasil["rekonsiliasi"] = rekonsiliasi.jalankan(hasil["nasional"])
     hasil["baris_sql"] = muat_sql.jalankan(silver, hasil)
     return hasil
