@@ -15,8 +15,9 @@ def silver():
 
 @pytest.fixture
 def gold():
-    return {"panel": pd.read_parquet(GOLD / "panel.parquet"), "nasional": pd.read_parquet(GOLD / "nasional.parquet"),
-            "rekonsiliasi": pd.read_parquet(GOLD / "rekonsiliasi.parquet")}
+    nasional = pd.read_parquet(GOLD / "nasional.parquet")
+    return {"panel": pd.read_parquet(GOLD / "panel.parquet"), "nasional": nasional,
+            "nasional_gold": nasional, "rekonsiliasi": pd.read_parquet(GOLD / "rekonsiliasi.parquet")}
 
 
 def aturan(nama):

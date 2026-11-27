@@ -1,7 +1,7 @@
 """Tahap 8 — Validasi dan dokumentasi. Dijalankan dari `python pipeline.py` setiap kali.
 
-Aturan keras (umum di aturan.py, khas kasus di khusus.py) menghentikan pipeline bila gagal. Aturan
-peringatan hanya dilaporkan. Hasilnya di reports/validasi.md; data dictionary ditulis ulang dari data.
+Aturan keras (umum di aturan.py, khas kasus di khusus.py, dan gold di gold.py) menghentikan pipeline bila gagal.
+Aturan peringatan hanya dilaporkan. Hasilnya di reports/validasi.md; data dictionary ditulis ulang dari data.
 Di akhir, angka semua komponen ditulis ke results/kelompok-03/metrics.json.
 """
 import pandera.pandas as pa
@@ -47,8 +47,7 @@ def jalankan(silver, gold):
     tulis("validasi.md", "\n\n".join([
         "# Hasil validasi Silver dan Gold",
         "Dihasilkan `python pipeline.py` (`src/validasi/`). Aturan keras menghentikan pipeline bila gagal; "
-        "peringatan dilaporkan untuk diperiksa manusia. Aturan juga diuji dengan salinan yang sengaja dirusak "
-        "(`pytest`, berkas `tests/test_validasi.py` dan `tests/test_validasi_gold.py`).",
+        "peringatan dilaporkan untuk diperiksa manusia. Aturan juga diuji dengan salinan yang sengaja dirusak.",
         tabel_md(tabel),
         "## Kegagalan aturan umum", tabel_md(gagal_umum.head(50)) if len(gagal_umum) else "Tidak ada.",
         "## Baris yang memicu aturan kasus", "\n\n".join(rinci_khusus) or "Tidak ada.",

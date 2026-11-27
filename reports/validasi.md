@@ -1,6 +1,6 @@
 # Hasil validasi Silver dan Gold
 
-Dihasilkan `python pipeline.py` (`src/validasi/`). Aturan keras menghentikan pipeline bila gagal; peringatan dilaporkan untuk diperiksa manusia. Aturan juga diuji dengan salinan yang sengaja dirusak (`pytest`, berkas `tests/test_validasi.py` dan `tests/test_validasi_gold.py`).
+Dihasilkan `python pipeline.py` (`src/validasi/`). Aturan keras menghentikan pipeline bila gagal; peringatan dilaporkan untuk diperiksa manusia. Aturan juga diuji dengan salinan yang sengaja dirusak.
 
 | aturan | jenis | keterangan | hasil |
 |---|---|---|---|
@@ -16,16 +16,16 @@ Dihasilkan `python pipeline.py` (`src/validasi/`). Aturan keras menghentikan pip
 | abr_satu_satuan | keras (kasus) | angka kelahiran remaja BPS, WDI, WHO bersatuan per_1000_perempuan_seumur | LOLOS |
 | abr_10_14_lebih_kecil | peringatan (kasus) | angka kelahiran 10–14 ≥ 15–19 pada tahun yang sama (peringatan) | LOLOS |
 | kb_bps_di_bawah_who | peringatan (kasus) | KB BPS Indonesia > WHO kebutuhan KB terpenuhi (peringatan: periksa definisi) | LOLOS |
-| gold: kunci panel unik | keras (Gold) | seri_kode + wilayah_kode + periode tidak kembar | LOLOS |
-| gold: satu satuan per indikator | keras (Gold) | satu indikator panel hanya punya satu satuan | LOLOS |
-| gold: status sel dan nilai | keras (Gold) | status sel baku; nilai ada jika dan hanya jika sel terisi | LOLOS |
-| gold: sel tertelusur ke Silver | keras (Gold) | setiap sel terisi punya baris Silver asal (seri, wilayah, periode, berkas) | LOLOS |
-| gold: nilai sama dengan Silver | keras (Gold) | nilai panel = nilai Silver asalnya (tidak ada nilai yang diubah di Gold) | LOLOS |
-| gold: tabel nasional unik | keras (Gold) | seri + rincian + periode tidak kembar | LOLOS |
-| rekonsiliasi: kategori baku | keras (Gold) | kategori dari daftar baku; penjelasan tidak kosong | LOLOS |
-| rekonsiliasi: selisih = utama − pembanding | keras (Gold) | selisih dihitung ulang dan cocok | LOLOS |
-| rekonsiliasi: baris berpasangan dihitung | keras (Gold) | pasangan selisih dengan dua nilai punya selisih, atau catatan mengapa tidak | LOLOS |
-| rekonsiliasi: periode utama tidak dibuang | keras (Gold) | setiap tahun seri utama di tabel nasional muncul di rekonsiliasi | LOLOS |
+| gold: kunci panel unik | keras (Gold) | kunci panel Gold (seri_kode x wilayah_kode x periode) tidak kembar | LOLOS |
+| gold: satu satuan per indikator | keras (Gold) | setiap indikator/seri hanya punya satu satuan baku | LOLOS |
+| gold: status sel dan nilai | keras (Gold) | sel terisi memiliki nilai, sel kosong tidak memiliki nilai | LOLOS |
+| gold: sel tertelusur ke Silver | keras (Gold) | setiap sel terisi di Gold berasal dari berkas raw sah di Silver | LOLOS |
+| gold: nilai sama dengan Silver | keras (Gold) | nilai sel terisi di Gold sama dengan nilai di Silver | LOLOS |
+| gold: tabel nasional unik | keras (Gold) | kunci tabel nasional Gold (seri_kode x rincian x periode) tidak kembar | LOLOS |
+| rekonsiliasi: kategori baku | keras (Gold) | kategori rekonsiliasi termasuk dalam daftar baku | LOLOS |
+| rekonsiliasi: selisih = utama − pembanding | keras (Gold) | selisih rekonsiliasi sama dengan nilai utama dikurangi nilai pembanding | LOLOS |
+| rekonsiliasi: baris berpasangan dihitung | keras (Gold) | baris berpasangan tanpa catatan khusus wajib dihitung selisihnya | LOLOS |
+| rekonsiliasi: periode utama tidak dibuang | keras (Gold) | seluruh periode seri utama tetap ada di tabel rekonsiliasi | LOLOS |
 
 ## Kegagalan aturan umum
 
